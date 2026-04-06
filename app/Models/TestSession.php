@@ -37,17 +37,17 @@ class TestSession extends Model
         return $query->where('status', TestSessionStatus::IN_PROGRESS);
     }
 
-    protected function user(): BelongsTo
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    protected function category(): BelongsTo
+    public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
-    protected function results(): HasMany
+    public function results(): HasMany
     {
         return $this->hasMany(TestResult::class);
     }

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('question_id')->constrained('questions');
             $table->unsignedTinyInteger('option_number');
-            $table->string('answer_text');
+            $table->text('answer_text');
             $table->timestamps();
         });
     }

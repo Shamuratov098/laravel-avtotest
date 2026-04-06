@@ -17,12 +17,12 @@ class Question extends Model
         ];
     }
 
-    protected function category(): BelongsTo
+    public function category(): BelongsTo
     {
         return $this->BelongsTo(Category::class);
     }
 
-    protected function answers(): HasMany
+    public function answers(): HasMany
     {
         return $this->hasMany(Answer::class);
     }

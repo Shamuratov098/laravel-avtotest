@@ -15,9 +15,9 @@ return new class extends Migration {
             $table->foreignId('category_id')->constrained('categories')->cascadeOnDelete();
             $table->text('question_text');
             $table->string('image_url')->nullable();
-            $table->unsignedTinyInteger('correct_answer');
+            $table->integer('correct_answer');
             $table->text('explanation');
-            $table->tinyInteger('order_in_category');
+            $table->integer('order_in_category');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 

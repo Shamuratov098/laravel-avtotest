@@ -12,7 +12,7 @@
     ],
     "correct_answer": 4,
     "question_category": "1",
-    "done": true
+    "done": false
   },
   {
     "id": 2,
@@ -28,7 +28,7 @@
     ],
     "correct_answer": 4,
     "question_category": "1",
-    "done": true
+    "done": false
   },
   {
     "id": 3,

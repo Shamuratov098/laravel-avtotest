@@ -6,10 +6,10 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['question_id', 'option_number', 'answer_text'])]
+#[Fillable(['question_id', 'option_number', 'answer_text', 'option_number'])]
 class Answer extends Model
 {
-    protected function question(): BelongsTo
+    public function question(): BelongsTo
     {
         return $this->belongsTo(Question::class);
     }
