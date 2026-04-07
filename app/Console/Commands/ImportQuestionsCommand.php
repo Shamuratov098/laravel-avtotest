@@ -24,7 +24,7 @@ class ImportQuestionsCommand extends Command
         foreach ($grouped as $categoryOrder => $questions) {
             $category = Category::firstOrCreate(
                 ['order' => (int)$categoryOrder],
-                ['name' => "{$categoryOrder}-kategoriya"]
+                ['name' => "{$categoryOrder}-variant"]
             );
             foreach ($questions as $q) {
                 try {
