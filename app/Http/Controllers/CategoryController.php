@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\CategoryResource;
 use App\Services\CategoryService;
 use Illuminate\Http\Request;
 
@@ -15,9 +16,7 @@ class CategoryController extends Controller
     {
         $categories = $this->categoryService->getAllCategories();
 
-        return response()->json([
-            'data' => $categories,
-        ]);
+        return CategoryResource::collection($categories);
     }
 
     /*    public function show(int $id)
