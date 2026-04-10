@@ -4,7 +4,9 @@ namespace App\Providers;
 
 use App\Repositories\CategoryRepository;
 use App\Repositories\Contracts\CategoryRepositoryInterface;
+use App\Repositories\Contracts\QuestionRepositoryInterface;
 use Illuminate\Support\ServiceProvider;
+use App\Repositories\QuestionRepository;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
@@ -16,6 +18,11 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(
             CategoryRepositoryInterface::class,
             CategoryRepository::class,
+        );
+
+        $this->app->bind(
+            QuestionRepositoryInterface::class,
+            QuestionRepository::class,
         );
     }
 
