@@ -22,8 +22,8 @@ class CategoryRepository implements CategoryRepositoryInterface
      *
      * @throws ModelNotFoundException — ID topilmasa avtomatik exception chiqadi
      */
-    /*  public function findById(int $id): Category
-      {
-          return Category::query()->findOrFail($id);
-      }*/
+    public function findById(int $id): Category
+    {
+        return Category::query()->findOrFail($id);
+    }
 }

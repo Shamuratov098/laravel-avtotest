@@ -4,12 +4,22 @@ namespace App\Services;
 
 use App\Models\Category;
 use App\Models\Question;
+use App\Repositories\Contracts\CategoryRepositoryInterface;
+use App\Repositories\Contracts\QuestionRepositoryInterface;
 use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
 readonly class QuestionService
 {
+
+    public function __construct(
+        private QuestionRepositoryInterface $questionRepository,
+        private CategoryRepositoryInterface $categoryRepository
+    )
+    {
+
+    }
     /*  public function __construct(private QuestionRepository $questionRepository)
       {
 
@@ -20,24 +30,13 @@ readonly class QuestionService
      */
     public function getQuestionByCategoryId(int $id): Collection
     {
-        Category::findOrFail($id);
 
-        return Question::query()
-            ->select([
-                'id',
-                'category_id',
-                'question_text',
-                'image_url',
-            ])
-            ->where('category_id', $id)
-            ->with(['answers' => function ($query) {
-                $query->select([
-                    'id',
-                    'question_id',
-                    'option_number',
-                    'answer_text',
-                ]);
-            }])
-            ->get();
+        $this->categoryRepository->findById($id);
+        return $this->questionRepository->getQuestionsByCategoryId($id);
+    }
+
+    public function getRandomTest(): Collection
+    {
+        return $this->questionRepository->getRandomTest();
     }
 }
