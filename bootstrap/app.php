@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\ActiveTestException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -46,6 +47,15 @@ return Application::configure(basePath: dirname(__DIR__))
                     'message' => 'Information not found.',
                     'status' => 404,
                 ], 404);
+            }
+        });
+
+        $exceptions->render(function (ActiveTestException $e, $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'message' => $e->getMessage(),
+                    'status' => 422,
+                ], 422);
             }
         });
     })->create();
