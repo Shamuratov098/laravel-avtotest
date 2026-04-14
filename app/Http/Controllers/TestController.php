@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ActiveTestException;
 use App\Http\Resources\QuestionResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -23,6 +24,19 @@ class TestController extends Controller
     public function startRandomTest(Request $request): JsonResponse
     {
         $result = $this->testService->startRandomTest($request->user());
+        return response()->json([
+            'session' => $result['session'],
+            'questions' => QuestionResource::collection($result['questions']),
+        ], 201);
+    }
+
+    /**
+     * @throws Throwable
+     * @throws ActiveTestException
+     */
+    public function startCategory(Request $request, int $categoryId): JsonResponse
+    {
+        $result = $this->testService->startCategoryTest($request->user(), $categoryId);
         return response()->json([
             'session' => $result['session'],
             'questions' => QuestionResource::collection($result['questions']),

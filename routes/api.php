@@ -17,4 +17,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/questions/variants/{id}', [QuestionController::class, 'getQuestionsByCategory']);
     Route::get('/questions/random', [QuestionController::class, 'getRandomQuestions']);
     Route::post('/tests/start/random', [TestController::class, 'startRandomTest']);
+    Route::post('/tests/start/category/{categoryId}', [TestController::class, 'startCategory']);
 });
