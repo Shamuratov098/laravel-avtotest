@@ -25,6 +25,80 @@ readonly class TestService
     /**
      * @throws Throwable
      */
+    public function submitAnswer(User $user, int $sessionId, array $data): array
+    {
+        $session = TestSession::with('results')->findOrFail($sessionId);
+
+        if ($session->user_id !== $user->id) {
+            abort(403, 'Bu sessiya sizga tegishli emas');
+        }
+        if ($session->status !== TestSessionStatus::IN_PROGRESS) {
+            abort(422, 'Bu test allaqachon yakunlangan');
+        }
+
+        $testResult = $session->results
+            ->firstWhere('question_id', $data['question_id']);
+
+        if (!$testResult) {
+            abort(422, 'Bu savol ushbu sesiyaga tegishli emas');
+        }
+
+        if (!is_null($testResult->chosen_answer)) {
+            abort(422, 'Bu savolga allaqachon javob berilgan.');
+        }
+
+        $question = $testResult->question()->with('answers')->firstOrFail();
+        $isCorrect = $question->correct_answer === (int)$data['chosen_answer'];
+
+        DB::transaction(function () use ($session, $testResult, $data, $isCorrect) {
+            $testResult->update([
+                'chosen_answer' => $data['chosen_answer'],
+                'is_correct' => $isCorrect,
+            ]);
+            if ($isCorrect) {
+                $session->increment('correct_count');
+            }
+            $answeredCount = $session->results()
+                ->whereNotNull('chosen_answer')
+                ->count();
+
+            if ($answeredCount === $session->total_questions) {
+                $session->update([
+                    'status' => TestSessionStatus::COMPLETED,
+                    'completed_at' => now(),
+                ]);
+            }
+        });
+        $session->refresh();
+
+        $answeredCount = $session->results()
+            ->whereNotNull('chosen_answer')
+            ->count();
+
+        $correctAnswer = $question->answers
+            ->firstWhere('option_number', $question->correct_answer);
+
+        return [
+            'is_correct' => $isCorrect,
+            'correct_answer' => [
+                'option_number' => $question->correct_answer,
+                'answer_text' => $correctAnswer?->answer_text,
+            ],
+            'explanation' => $question->explanation,
+            'progress' => [
+                'answered' => $answeredCount,
+                'correct' => $session->correct_count,
+                'wrong' => $answeredCount - $session->correct_count,
+                'remaining' => $session->total_questions - $answeredCount,
+            ],
+            'session_completed' => $session->status === TestSessionStatus::COMPLETED,
+            'session' => $session->status === TestSessionStatus::COMPLETED ? $session : null,
+        ];
+    }
+
+    /**
+     * @throws Throwable
+     */
     public function startRandomTest(User $user)
     {
         $this->checkActiveSession($user->id);

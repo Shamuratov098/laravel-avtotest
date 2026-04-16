@@ -5,8 +5,8 @@ namespace App\Providers;
 use App\Repositories\CategoryRepository;
 use App\Repositories\Contracts\CategoryRepositoryInterface;
 use App\Repositories\Contracts\QuestionRepositoryInterface;
-use Illuminate\Support\ServiceProvider;
 use App\Repositories\QuestionRepository;
+use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
 {

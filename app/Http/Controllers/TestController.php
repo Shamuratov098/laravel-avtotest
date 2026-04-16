@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\ActiveTestException;
+use App\Http\Requests\Test\AnswerTestRequest;
 use App\Http\Resources\QuestionResource;
+use App\Http\Resources\SessionResultResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Services\TestService;
@@ -41,5 +43,27 @@ class TestController extends Controller
             'session' => $result['session'],
             'questions' => QuestionResource::collection($result['questions']),
         ], 201);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function checkAnswer(AnswerTestRequest $request, int $sessionId): JsonResponse
+    {
+        $result = $this->testService->submitAnswer(
+            $request->user(),
+            $sessionId,
+            $request->validated(),
+        );
+        return response()->json([
+            'is_correct' => $result['is_correct'],
+            'correct_answer' => $result['correct_answer'],
+            'explanation' => $result['explanation'],
+            'progress' => $result['progress'],
+            'session_completed' => $result['session_completed'],
+            'result' => $result['session_completed']
+                ? new SessionResultResource($result['session'])
+                : null,
+        ], 200);
     }
 }
