@@ -6,6 +6,8 @@ use App\Exceptions\ActiveTestException;
 use App\Http\Requests\Test\AnswerTestRequest;
 use App\Http\Resources\QuestionResource;
 use App\Http\Resources\SessionResultResource;
+use App\Models\TestSession;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Services\TestService;
@@ -13,6 +15,8 @@ use Throwable;
 
 class TestController extends Controller
 {
+    use AuthorizesRequests;
+
     public function __construct(
         private readonly TestService $testService,
     )
@@ -50,6 +54,9 @@ class TestController extends Controller
      */
     public function checkAnswer(AnswerTestRequest $request, int $sessionId): JsonResponse
     {
+        $session = TestSession::findOrFail($sessionId);
+        $this->authorize('answer', $session);
+
         $result = $this->testService->submitAnswer(
             $request->user(),
             $sessionId,
