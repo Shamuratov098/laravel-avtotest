@@ -1,0 +1,28 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class EnsureAdminWeb
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  Closure(Request): (Response)  $next
+     */
+    public function handle(Request $request, Closure $next): Response
+    {
+        if (! auth()->check()) {
+            return redirect()->route('admin.login');
+        }
+
+        if (! auth()->user()->isAdmin()) {
+            abort(403, 'Access denied. Admin privileges required.');
+        }
+
+        return $next($request);
+    }
+}

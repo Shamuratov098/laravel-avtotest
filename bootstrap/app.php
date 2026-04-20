@@ -1,6 +1,8 @@
 <?php
 
 use App\Exceptions\ActiveTestException;
+use App\Http\Middleware\EnsureAdminWeb;
+use App\Http\Middleware\EnsureIsAdmin;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -20,7 +22,13 @@ return Application::configure(basePath: dirname(__DIR__))
         \App\Providers\RepositoryServiceProvider::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'admin' => EnsureIsAdmin::class,
+            'admin.web' => EnsureAdminWeb::class,
+        ]);
+        // Auth redirect configuration
+        $middleware->redirectGuestsTo(fn() => route('admin.login'));
+        $middleware->redirectUsersTo(fn() => route('admin.dashboard'));
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (AuthenticationException $e, $request) {
