@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 use App\Services\TestService;
 use Throwable;
 
-class TestController extends Controller
+class TestSessionController extends Controller
 {
     use AuthorizesRequests;
 
