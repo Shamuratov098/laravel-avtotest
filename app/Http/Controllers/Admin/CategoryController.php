@@ -22,7 +22,7 @@ class CategoryController extends Controller
     public function index(): View
     {
         $categories = $this->categoryService->getAllCategories();
-        return view('category.index', compact('categories'));
+        return view('admin.category.index', compact('categories'));
     }
 
     /**
@@ -30,7 +30,7 @@ class CategoryController extends Controller
      */
     public function create(): View
     {
-        return view('category.create');
+        return view('admin.category.create');
     }
 
     /**
@@ -44,7 +44,7 @@ class CategoryController extends Controller
 
     public function edit(Category $category): View
     {
-        return view('category.edit', compact('category'));
+        return view('admin.category.edit', compact('category'));
     }
 
     public function update(CategoryUpdateRequest $request, Category $category): RedirectResponse
