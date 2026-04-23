@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\Admin\CategoryRequest;
+use App\Http\Requests\Admin\CategoryCreateRequest;
+use App\Http\Requests\Admin\CategoryUpdateRequest;
+use App\Models\Category;
 use App\Services\Admin\CategoryService;
 use Exception;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class CategoryController extends Controller
@@ -33,9 +36,32 @@ class CategoryController extends Controller
     /**
      * @throws Exception
      */
-    public function store(CategoryRequest $request)
+    public function store(CategoryCreateRequest $request)
     {
         $this->categoryService->createCategory($request);
-        return $this->success('admin.categories.index', 'Kategoriya muvafaqiyatli yaratildi');
+        return $this->success('admin.categories.index', 'Kategoriya muvaffaqiyatli yaratildi!');
+    }
+
+    public function edit(Category $category): View
+    {
+        return view('category.edit', compact('category'));
+    }
+
+    public function update(CategoryUpdateRequest $request, Category $category): RedirectResponse
+    {
+        $this->categoryService->update($request, $category);
+        return $this->success('admin.categories.index', 'Kategoriya muvaffaqiyatli yangilandi!');
+
+    }
+
+    public function destroy(Category $category): RedirectResponse
+    {
+        if ($category->total_questions > 0) {
+            return $this->errorBack('Bu kategoriyada test savollar mavjud. Avval ularni o\'chiring yoki boshqa kategoriyaga ko\'chiring.');
+        }
+
+        $this->categoryService->delete($category);
+
+        return $this->successBack('Kategoriya muvaffaqiyatli o\'chirildi!');
     }
 }
