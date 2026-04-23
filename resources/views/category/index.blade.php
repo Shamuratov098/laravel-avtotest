@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Kategoriyalar')
+@section('title', 'KATEGORIYALAR')
 
 @section('content')
 
@@ -78,8 +78,7 @@
                         <!-- Amallar -->
                         <td style="padding:14px 24px;">
                             <div style="display:flex; align-items:center; gap:8px;">
-                                <a href=""
-                                   {{--{{ route('admin.categories.edit', $category) }}--}}
+                                <a href="{{ route('admin.categories.edit', $category) }}"
                                    style="display:inline-flex; align-items:center; gap:6px; padding:6px 12px; background:#EEF2FF; color:#5750F1; border-radius:6px; text-decoration:none; font-size:12px; font-weight:600; transition:background .2s;"
                                    onmouseover="this.style.background='#dde4ff'"
                                    onmouseout="this.style.background='#EEF2FF'">
@@ -88,11 +87,10 @@
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                               d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                     </svg>
-                                    Tahrirlash
+                                    Yangilash
                                 </a>
 
-                                <form action="" method="POST"
-                                      {{--{{ route('admin.categories.destroy', $category) }}--}}
+                                <form action="{{ route('admin.categories.destroy', $category) }}" method="POST"
                                       onsubmit="return confirm('Rostdan ham o\'chirmoqchimisiz?');">
                                     @csrf
                                     @method('DELETE')
