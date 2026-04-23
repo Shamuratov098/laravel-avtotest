@@ -45,7 +45,7 @@
                 BOSH SAHIFA
             </a>
 
-            <a href=""
+            <a href="{{route('admin.categories.index')}}"
                style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; text-decoration:none; margin-bottom:2px; font-size:14px; font-weight:500;
                {{ request()->routeIs('admin.categories.*') ? 'background:rgba(87,80,241,0.07); color:#5750F1;' : 'color:#637381;' }}">
                 <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
