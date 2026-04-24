@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\QuestionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -24,5 +25,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Categories
         Route::resource('categories', CategoryController::class);
+        Route::resource('questions', QuestionController::class);
     });
 });

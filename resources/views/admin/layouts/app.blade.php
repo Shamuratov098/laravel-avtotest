@@ -65,9 +65,9 @@
                 Brendlar
             </a>--}}
 
-            <a href="#"
+            <a href="{{route('admin.questions.index')}}"
                style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; text-decoration:none; margin-bottom:2px; font-size:14px; font-weight:500;
-               {{ request()->routeIs('admin.products.*') ? 'background:rgba(87,80,241,0.07); color:#5750F1;' : 'color:#637381;' }}">
+               {{ request()->routeIs('admin.questions.*') ? 'background:rgba(87,80,241,0.07); color:#5750F1;' : 'color:#637381;' }}">
                 <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round"
                           d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
