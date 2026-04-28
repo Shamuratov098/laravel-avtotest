@@ -4,6 +4,8 @@ namespace App\Services\Admin;
 
 use App\Models\Category;
 use App\Models\Question;
+use Exception;
+use http\Message;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
@@ -48,8 +50,39 @@ class QuestionService
             ->select([
                 'id',
                 'name',
+                'total_questions'
             ])
-            ->orderBy('name')
+            ->withCount('questions')
+            ->orderBy('order', 'desc')
             ->get();
+    }
+
+    public function store(array $data): Question
+    {
+        $nextOption = Question::max('order_in_category') + 1;
+        $question = Question::create([
+            'category_id' => $data['category_id'],
+            'question_text' => $data['question_text'],
+            'image_url' => $data['image_url'] ?? null,
+            'correct_answer' => $data['correct_answer'],
+            'explanation' => $data['explanation'] ?? null,
+            'order_in_category' => $nextOption,
+            'is_active' => $data['is_active'] ?? true,
+        ]);
+        $this->syncAnswers($question, $data['answers']);
+
+        return $question;
+    }
+
+
+    private function syncAnswers(Question $question, array $answers): void
+    {
+        foreach ($answers as $answer) {
+            $question->answers()->create([
+                'option_number' => $answer['option_number'],
+                'answer_text' => $answer['answer_text'],
+            ]);
+        }
+
     }
 }
