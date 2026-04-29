@@ -25,6 +25,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Categories
         Route::resource('categories', CategoryController::class);
+        //Questions
         Route::resource('questions', QuestionController::class);
     });
 });

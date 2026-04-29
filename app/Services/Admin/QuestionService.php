@@ -4,8 +4,6 @@ namespace App\Services\Admin;
 
 use App\Models\Category;
 use App\Models\Question;
-use Exception;
-use http\Message;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
@@ -74,7 +72,32 @@ class QuestionService
         return $question;
     }
 
+    public function update(Question $question, array $data): Question
+    {
 
+        $question->update([
+            'category_id' => $data['category_id'],
+            'question_text' => $data['question_text'],
+            'image_url' => $data['image_url'] ?? null,
+            'correct_answer' => $data['correct_answer'],
+            'explanation' => $data['explanation'] ?? null,
+//            'order_in_category' => $data['order_in_category'],
+            'is_active' => $data['is_active'],
+        ]);
+
+        $question->answers()->delete();
+        $this->syncAnswers($question, $data['answers']);
+
+        return $question->fresh('answers');
+    }
+
+    public function delete(Question $question): void
+    {
+        $question->answers()->delete();
+        $question->delete();
+    }
+
+    // HELPERS
     private function syncAnswers(Question $question, array $answers): void
     {
         foreach ($answers as $answer) {

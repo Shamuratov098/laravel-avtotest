@@ -4,9 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreQuestionRequest;
+use App\Http\Requests\Admin\UpdateQuestionRequest;
+use App\Models\Question;
 use App\Services\Admin\QuestionService;
-use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class QuestionController extends Controller
@@ -56,24 +57,34 @@ class QuestionController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Question $question): View
     {
-        //
+        $question = $this->questionService->getQuestionForEdit($question->id);
+        $categories = $this->questionService->getAllCategories();
+
+        return view('admin.question.edit', compact('question', 'categories'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateQuestionRequest $request, Question $question): RedirectResponse
     {
-        //
+        $this->questionService->update($question, $request->validated());
+
+        return redirect()
+            ->route('admin.questions.index')
+            ->with('success', 'Savol muvaffaqiyatli yangilandi!');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Question $question)
     {
-        //
+        $this->questionService->delete($question);
+        return redirect()
+            ->route('admin.questions.index')
+            ->with('success', 'Savol o\'chirildi!');
     }
 }
