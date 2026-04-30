@@ -51,4 +51,27 @@ class TestSession extends Model
     {
         return $this->hasMany(TestResult::class);
     }
+
+    public function formattedDuration(): ?string
+    {
+        if ($this->status !== TestSessionStatus::COMPLETED || ! $this->completed_at) {
+            return null;
+        }
+
+        $seconds = (int) $this->started_at->diffInSeconds($this->completed_at);
+
+        if ($seconds < 60) {
+            return "{$seconds} sek";
+        }
+
+        if ($seconds < 3600) {
+            $minutes = intdiv($seconds, 60);
+            $remaining = $seconds % 60;
+            return $remaining > 0 ? "{$minutes} daq {$remaining} sek" : "{$minutes} daq";
+        }
+
+        $hours = intdiv($seconds, 3600);
+        $minutes = intdiv($seconds % 3600, 60);
+        return $minutes > 0 ? "{$hours} soat {$minutes} daq" : "{$hours} soat";
+    }
 }

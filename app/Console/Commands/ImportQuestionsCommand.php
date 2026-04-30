@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+//php artisan questions:import avtotest-question.json
+
 use App\Models\Category;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
