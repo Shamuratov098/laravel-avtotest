@@ -75,9 +75,9 @@
                 TEST SAVOLLAR
             </a>
 
-            <a href="#"
+            <a href="{{ route('admin.sessions.index') }}"
                style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; text-decoration:none; margin-bottom:2px; font-size:14px; font-weight:500;
-               {{ request()->routeIs('admin.orders.*') ? 'background:rgba(87,80,241,0.07); color:#5750F1;' : 'color:#637381;' }}">
+               {{ request()->routeIs('admin.sessions.*') ? 'background:rgba(87,80,241,0.07); color:#5750F1;' : 'color:#637381;' }}">
                 <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round"
                           d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
@@ -110,8 +110,7 @@
                     <p style="font-size:11px; color:#8899A8; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ auth()->user()->email ?? '' }}</p>
                 </div>
             </div>
-            <form method="POST" action="">
-                {{--                {{ route('admin.logout') }}--}}
+            <form method="POST" action="{{ route('admin.logout') }}">
                 @csrf
                 <button type="submit"
                         style="width:100%; display:flex; align-items:center; gap:8px; padding:9px 12px; background:none; border:1px solid #FEE2E2; border-radius:8px; cursor:pointer; font-size:13px; font-weight:500; color:#EF4444;">
