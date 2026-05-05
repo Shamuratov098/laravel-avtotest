@@ -17,9 +17,7 @@
 
     {{-- Header --}}
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
-        <div>
-            <h1 style="font-size:20px; font-weight:700; color:#1C2434; margin:0;">Test Savollar</h1>
-            <p style="font-size:13px; color:#8899A8; margin:4px 0 0;">
+        <div><p style="font-size:13px; color:#8899A8; margin:4px 0 0;">
                 Jami: <strong>{{ $questions->total() }}</strong> ta savol
             </p>
         </div>
@@ -38,7 +36,8 @@
     <form method="GET" action="{{ route('admin.questions.index') }}"
           style="background:#fff; border-radius:12px; border:1px solid #F3F4F6; box-shadow:0 1px 4px rgba(0,0,0,.06);
                  padding:16px 20px; margin-bottom:20px;">
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; align-items:end;">
+        <div
+            style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; align-items:end;">
 
             {{-- Kategoriya --}}
             <div>
@@ -66,7 +65,8 @@
                                background:#fff; font-size:13px; color:#1C2434; cursor:pointer;">
                     <option value="">Hammasi</option>
                     <option value="active" {{ ($filters['status'] ?? '') === 'active' ? 'selected' : '' }}>Faol</option>
-                    <option value="inactive" {{ ($filters['status'] ?? '') === 'inactive' ? 'selected' : '' }}>Nofaol</option>
+                    <option value="inactive" {{ ($filters['status'] ?? '') === 'inactive' ? 'selected' : '' }}>Nofaol
+                    </option>
                 </select>
             </div>
 
@@ -221,7 +221,8 @@
                                             style="display:inline-flex; align-items:center; gap:5px; padding:4px 10px;
                                                    background:#DCFCE7; color:#16A34A; border:none; border-radius:20px;
                                                    font-size:11px; font-weight:700; cursor:pointer;">
-                                        <span style="width:6px; height:6px; background:#16A34A; border-radius:50%;"></span>
+                                        <span
+                                            style="width:6px; height:6px; background:#16A34A; border-radius:50%;"></span>
                                         Faol
                                     </button>
                                 @else
@@ -229,7 +230,8 @@
                                             style="display:inline-flex; align-items:center; gap:5px; padding:4px 10px;
                                                    background:#F3F4F6; color:#637381; border:none; border-radius:20px;
                                                    font-size:11px; font-weight:700; cursor:pointer;">
-                                        <span style="width:6px; height:6px; background:#9CA3AF; border-radius:50%;"></span>
+                                        <span
+                                            style="width:6px; height:6px; background:#9CA3AF; border-radius:50%;"></span>
                                         Nofaol
                                     </button>
                                 @endif
@@ -287,8 +289,10 @@
                                     </svg>
                                 </div>
                                 @if($hasFilter)
-                                    <p style="font-size:15px; font-weight:700; color:#1C2434; margin:0;">Hech narsa topilmadi</p>
-                                    <p style="font-size:13px; color:#8899A8; margin:0;">Filtr shartlariga mos savol yo'q</p>
+                                    <p style="font-size:15px; font-weight:700; color:#1C2434; margin:0;">Hech narsa
+                                        topilmadi</p>
+                                    <p style="font-size:13px; color:#8899A8; margin:0;">Filtr shartlariga mos savol
+                                        yo'q</p>
                                     <a href="{{ route('admin.questions.index') }}"
                                        style="margin-top:4px; display:inline-flex; align-items:center; gap:6px;
                                           padding:9px 18px; background:#F3F4F6; color:#637381; border-radius:8px;
@@ -296,7 +300,8 @@
                                         Filterni tozalash
                                     </a>
                                 @else
-                                    <p style="font-size:15px; font-weight:700; color:#1C2434; margin:0;">Savollar topilmadi</p>
+                                    <p style="font-size:15px; font-weight:700; color:#1C2434; margin:0;">Savollar
+                                        topilmadi</p>
                                     <p style="font-size:13px; color:#8899A8; margin:0;">Birinchi savolni yarating</p>
                                     <a href="{{ route('admin.questions.create') }}"
                                        style="margin-top:4px; display:inline-flex; align-items:center; gap:6px;

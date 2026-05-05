@@ -155,52 +155,34 @@
     }
 }
 
-/* Dashboard Card Top Stripe */
-.card-stripe {
-    position: relative;
-    overflow: hidden;
-}
-
-.card-stripe::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: var(--stripe-color, #5750F1);
-}
-
-.card-stripe-indigo { --stripe-color: #5750F1; }
-.card-stripe-rose   { --stripe-color: #EC4899; }
-.card-stripe-blue   { --stripe-color: #3B82F6; }
-.card-stripe-emerald{ --stripe-color: #10B981; }
-
-/* Dashboard Trend Pills */
+/* Dashboard Trend (NextAdmin uslubi: faqat strelka rangli) */
 .trend-pill {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 5px;
     font-size: 12px;
-    font-weight: 600;
-    padding: 3px 8px;
-    border-radius: 999px;
+    font-weight: 700;
+    line-height: 1;
+    color: #1C2434;
+}
+
+.trend-arrow {
+    font-size: 13px;
+    font-weight: 800;
     line-height: 1;
 }
 
-.trend-up {
-    background: #ECFDF5;
-    color: #047857;
-}
+.trend-up    .trend-arrow,
+.trend-pill.trend-up    { color: #10B981; }
+.trend-down  .trend-arrow,
+.trend-pill.trend-down  { color: #EF4444; }
+.trend-flat  .trend-arrow,
+.trend-pill.trend-flat  { color: #8899A8; }
 
-.trend-down {
-    background: #FEF2F2;
-    color: #B91C1C;
-}
-
-.trend-flat {
-    background: #F3F4F6;
-    color: #6B7280;
+.trend-caption {
+    color: #8899A8;
+    font-weight: 500;
+    margin-left: 2px;
 }
 
 /* Recent Session Row */
@@ -209,18 +191,18 @@
 }
 
 .session-row:hover {
-    background-color: #F9FAFB;
+    background-color: #F7F9FC;
 }
 
-/* Pass / Fail Badge */
+/* Pass / Fail Badge (chip uslubi) */
 .pass-badge {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 5px;
     font-size: 11px;
-    font-weight: 600;
-    padding: 3px 8px;
-    border-radius: 999px;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 8px;
     line-height: 1;
 }
 
@@ -248,4 +230,35 @@
     background: linear-gradient(90deg, #5750F1, #8B5CF6);
     border-radius: 999px;
     transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dashboard segmented toggle (NextAdmin chart buttons) */
+.seg-group {
+    display: inline-flex;
+    background: #F7F9FC;
+    border: 1px solid #F3F4F6;
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+}
+
+.seg-btn {
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #637381;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all .15s;
+    line-height: 1;
+}
+
+.seg-btn:hover { color: #1C2434; }
+
+.seg-btn.is-active {
+    background: #fff;
+    color: #1C2434;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
 }
