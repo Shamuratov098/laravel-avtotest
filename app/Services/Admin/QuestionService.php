@@ -9,8 +9,12 @@ use Illuminate\Support\Collection;
 
 class QuestionService
 {
-    public function getAllQuestions(): LengthAwarePaginator
+    public function getAllQuestions(array $filters = []): LengthAwarePaginator
     {
+        $categoryId = $filters['category_id'] ?? null;
+        $search = $filters['search'] ?? null;
+        $status = $filters['status'] ?? null;
+
         return Question::query()
             ->select([
                 'id',
@@ -19,7 +23,8 @@ class QuestionService
                 'image_url',
                 'category_id',
                 'correct_answer',
-                'is_active'
+                'is_active',
+                'created_at',
             ])
             ->with([
                 'category:id,name',
@@ -31,8 +36,17 @@ class QuestionService
                 ])
                     ->orderBy('option_number'),
             ])
-            ->orderBy('order_in_category')
-            ->paginate(20);
+            ->when($categoryId, fn($q, $id) => $q->where('category_id', $id))
+            ->when($search, fn($q, $s) => $q->where('question_text', 'like', "%{$s}%"))
+            ->when($status === 'active', fn($q) => $q->where('is_active', true))
+            ->when($status === 'inactive', fn($q) => $q->where('is_active', false))
+            ->when(
+                $categoryId,
+                fn($q) => $q->orderBy('order_in_category'),
+                fn($q) => $q->orderByDesc('created_at'),
+            )
+            ->paginate(20)
+            ->withQueryString();
     }
 
     public function getQuestionForEdit(int $id): Question
@@ -95,6 +109,13 @@ class QuestionService
     {
         $question->answers()->delete();
         $question->delete();
+    }
+
+    public function toggleActive(Question $question): bool
+    {
+        $question->update(['is_active' => !$question->is_active]);
+
+        return $question->is_active;
     }
 
     // HELPERS

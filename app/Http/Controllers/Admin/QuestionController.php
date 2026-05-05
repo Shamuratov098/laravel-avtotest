@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreQuestionRequest;
 use App\Http\Requests\Admin\UpdateQuestionRequest;
+use App\Models\Category;
 use App\Models\Question;
 use App\Services\Admin\QuestionService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class QuestionController extends Controller
@@ -22,10 +24,13 @@ class QuestionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $questions = $this->questionService->getAllQuestions();
-        return view('admin.question.index', compact('questions'));
+        $filters = $request->only(['category_id', 'search', 'status']);
+        $questions = $this->questionService->getAllQuestions($filters);
+        $categories = Category::orderBy('order')->get(['id', 'name']);
+
+        return view('admin.question.index', compact('questions', 'categories', 'filters'));
     }
 
     /**
@@ -86,5 +91,13 @@ class QuestionController extends Controller
         return redirect()
             ->route('admin.questions.index')
             ->with('success', 'Savol o\'chirildi!');
+    }
+
+    public function toggleActive(Question $question): RedirectResponse
+    {
+        $isActive = $this->questionService->toggleActive($question);
+        $message = $isActive ? 'Savol faollashtirildi!' : 'Savol nofaollashtirildi!';
+
+        return redirect()->back()->with('success', $message);
     }
 }

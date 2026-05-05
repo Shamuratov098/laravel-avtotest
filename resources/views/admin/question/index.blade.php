@@ -33,6 +33,72 @@
         </a>
     </div>
 
+    {{-- Filterlar --}}
+    @php $hasFilter = !empty(array_filter($filters)); @endphp
+    <form method="GET" action="{{ route('admin.questions.index') }}"
+          style="background:#fff; border-radius:12px; border:1px solid #F3F4F6; box-shadow:0 1px 4px rgba(0,0,0,.06);
+                 padding:16px 20px; margin-bottom:20px;">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; align-items:end;">
+
+            {{-- Kategoriya --}}
+            <div>
+                <label style="display:block; font-size:11px; font-weight:700; color:#8899A8; text-transform:uppercase;
+                              letter-spacing:.06em; margin-bottom:6px;">Kategoriya</label>
+                <select name="category_id"
+                        style="width:100%; padding:9px 12px; border:1px solid #E5E7EB; border-radius:8px;
+                               background:#fff; font-size:13px; color:#1C2434; cursor:pointer;">
+                    <option value="">Hammasi</option>
+                    @foreach($categories as $category)
+                        <option value="{{ $category->id }}"
+                            {{ ($filters['category_id'] ?? null) == $category->id ? 'selected' : '' }}>
+                            {{ $category->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Holat --}}
+            <div>
+                <label style="display:block; font-size:11px; font-weight:700; color:#8899A8; text-transform:uppercase;
+                              letter-spacing:.06em; margin-bottom:6px;">Holat</label>
+                <select name="status"
+                        style="width:100%; padding:9px 12px; border:1px solid #E5E7EB; border-radius:8px;
+                               background:#fff; font-size:13px; color:#1C2434; cursor:pointer;">
+                    <option value="">Hammasi</option>
+                    <option value="active" {{ ($filters['status'] ?? '') === 'active' ? 'selected' : '' }}>Faol</option>
+                    <option value="inactive" {{ ($filters['status'] ?? '') === 'inactive' ? 'selected' : '' }}>Nofaol</option>
+                </select>
+            </div>
+
+            {{-- Qidiruv --}}
+            <div style="grid-column: span 2;">
+                <label style="display:block; font-size:11px; font-weight:700; color:#8899A8; text-transform:uppercase;
+                              letter-spacing:.06em; margin-bottom:6px;">Savol matni qidiruv</label>
+                <input type="text" name="search" value="{{ $filters['search'] ?? '' }}"
+                       placeholder="Savol matnidan qidirish..."
+                       style="width:100%; padding:9px 12px; border:1px solid #E5E7EB; border-radius:8px;
+                              background:#fff; font-size:13px; color:#1C2434;">
+            </div>
+
+            {{-- Tugmalar --}}
+            <div style="display:flex; gap:8px;">
+                <button type="submit"
+                        style="flex:1; padding:9px 16px; background:#5750F1; color:#fff; border:none; border-radius:8px;
+                               font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;">
+                    Filtrlash
+                </button>
+                @if($hasFilter)
+                    <a href="{{ route('admin.questions.index') }}"
+                       style="padding:9px 14px; background:#F3F4F6; color:#637381; border-radius:8px;
+                              text-decoration:none; font-size:13px; font-weight:600; white-space:nowrap;
+                              display:inline-flex; align-items:center;">
+                        Tozalash
+                    </a>
+                @endif
+            </div>
+        </div>
+    </form>
+
     {{-- Table Card --}}
     <div style="background:#fff; border-radius:12px; border:1px solid #F3F4F6;
             box-shadow:0 1px 4px rgba(0,0,0,.06); overflow:hidden;">
@@ -132,21 +198,28 @@
 
                         {{-- Holat --}}
                         <td style="padding:16px 16px; text-align:center;">
-                            @if($question->is_active)
-                                <span style="display:inline-flex; align-items:center; gap:5px; padding:4px 10px;
-                                         background:#DCFCE7; color:#16A34A; border-radius:20px;
-                                         font-size:11px; font-weight:700;">
-                                <span style="width:6px; height:6px; background:#16A34A; border-radius:50%;"></span>
-                                Faol
-                            </span>
-                            @else
-                                <span style="display:inline-flex; align-items:center; gap:5px; padding:4px 10px;
-                                         background:#F3F4F6; color:#637381; border-radius:20px;
-                                         font-size:11px; font-weight:700;">
-                                <span style="width:6px; height:6px; background:#9CA3AF; border-radius:50%;"></span>
-                                Nofaol
-                            </span>
-                            @endif
+                            <form action="{{ route('admin.questions.toggle-active', $question) }}" method="POST"
+                                  style="display:inline;">
+                                @csrf
+                                @method('PATCH')
+                                @if($question->is_active)
+                                    <button type="submit" title="Nofaol qilish"
+                                            style="display:inline-flex; align-items:center; gap:5px; padding:4px 10px;
+                                                   background:#DCFCE7; color:#16A34A; border:none; border-radius:20px;
+                                                   font-size:11px; font-weight:700; cursor:pointer;">
+                                        <span style="width:6px; height:6px; background:#16A34A; border-radius:50%;"></span>
+                                        Faol
+                                    </button>
+                                @else
+                                    <button type="submit" title="Faollashtirish"
+                                            style="display:inline-flex; align-items:center; gap:5px; padding:4px 10px;
+                                                   background:#F3F4F6; color:#637381; border:none; border-radius:20px;
+                                                   font-size:11px; font-weight:700; cursor:pointer;">
+                                        <span style="width:6px; height:6px; background:#9CA3AF; border-radius:50%;"></span>
+                                        Nofaol
+                                    </button>
+                                @endif
+                            </form>
                         </td>
 
                         {{-- Amallar --}}
@@ -199,19 +272,29 @@
                                               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                                     </svg>
                                 </div>
-                                <p style="font-size:15px; font-weight:700; color:#1C2434; margin:0;">Savollar
-                                    topilmadi</p>
-                                <p style="font-size:13px; color:#8899A8; margin:0;">Birinchi savolni yarating</p>
-                                <a href="{{ route('admin.questions.create') }}"
-                                   style="margin-top:4px; display:inline-flex; align-items:center; gap:6px;
-                                      padding:9px 18px; background:#5750F1; color:#fff; border-radius:8px;
-                                      text-decoration:none; font-size:13px; font-weight:600;">
-                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"
-                                         viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                                    </svg>
-                                    Yangi Savol Qo'shish
-                                </a>
+                                @if($hasFilter)
+                                    <p style="font-size:15px; font-weight:700; color:#1C2434; margin:0;">Hech narsa topilmadi</p>
+                                    <p style="font-size:13px; color:#8899A8; margin:0;">Filtr shartlariga mos savol yo'q</p>
+                                    <a href="{{ route('admin.questions.index') }}"
+                                       style="margin-top:4px; display:inline-flex; align-items:center; gap:6px;
+                                          padding:9px 18px; background:#F3F4F6; color:#637381; border-radius:8px;
+                                          text-decoration:none; font-size:13px; font-weight:600;">
+                                        Filterni tozalash
+                                    </a>
+                                @else
+                                    <p style="font-size:15px; font-weight:700; color:#1C2434; margin:0;">Savollar topilmadi</p>
+                                    <p style="font-size:13px; color:#8899A8; margin:0;">Birinchi savolni yarating</p>
+                                    <a href="{{ route('admin.questions.create') }}"
+                                       style="margin-top:4px; display:inline-flex; align-items:center; gap:6px;
+                                          padding:9px 18px; background:#5750F1; color:#fff; border-radius:8px;
+                                          text-decoration:none; font-size:13px; font-weight:600;">
+                                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"
+                                             viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                                        </svg>
+                                        Yangi Savol Qo'shish
+                                    </a>
+                                @endif
                             </div>
                         </td>
                     </tr>

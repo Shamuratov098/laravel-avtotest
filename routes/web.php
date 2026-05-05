@@ -32,6 +32,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Categories
         Route::resource('categories', CategoryController::class);
         //Questions
+        Route::patch('questions/{question}/toggle-active', [QuestionController::class, 'toggleActive'])
+            ->name('questions.toggle-active');
         Route::resource('questions', QuestionController::class);
         //Sessions (Yechilgan testlar)
         Route::resource('sessions', SessionController::class)->only(['index', 'show', 'destroy']);
