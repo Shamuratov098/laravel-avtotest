@@ -137,30 +137,6 @@
             </div>
 
             <div style="display:flex; align-items:center; gap:12px;">
-                <!-- Search -->
-                <div
-                    style="display:flex; align-items:center; gap:8px; background:#F7F9FC; border:1px solid #E8E8E8; border-radius:8px; padding:8px 14px; width:220px;">
-                    <svg width="16" height="16" fill="none" stroke="#8899A8" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                    <input type="text" placeholder="Qidirish..."
-                           style="border:none; background:none; outline:none; font-size:13px; color:#637381; width:100%;">
-                </div>
-
-                <!-- Notification -->
-                <div style="position:relative;">
-                    <button
-                        style="width:38px; height:38px; background:#F7F9FC; border:1px solid #E8E8E8; border-radius:8px; display:flex; align-items:center; justify-content:center; cursor:pointer;">
-                        <svg width="18" height="18" fill="none" stroke="#637381" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                        </svg>
-                        <span
-                            style="position:absolute; top:8px; right:8px; width:7px; height:7px; background:#EF4444; border-radius:50%; border:2px solid #fff;"></span>
-                    </button>
-                </div>
-
                 <!-- Avatar -->
                 <div
                     style="width:38px; height:38px; background:#EEF2FF; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; border:2px solid #E8E8E8;">
