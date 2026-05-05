@@ -26,7 +26,8 @@ class UpdateQuestionRequest extends FormRequest
         return [
             'category_id' => ['required', 'exists:categories,id'],
             'question_text' => ['required', 'string'],
-            'image_url' => ['nullable', 'string'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'delete_image' => ['nullable', 'boolean'],
             'explanation' => ['nullable', 'string'],
 //            'order_in_category' => ['required', 'integer', 'min:1'],
             'is_active' => ['boolean'],
@@ -63,10 +64,12 @@ class UpdateQuestionRequest extends FormRequest
         return [
             'category_id.required' => 'Kategoriyani tanlang.',
             'question_text.required' => 'Savol matni kiritilishi shart.',
-//            'order_in_category.required' => 'Tartib raqamini kiriting.',
             'answers.required' => 'Kamida 2 ta javob variantini kiriting.',
             'answers.*.answer_text.required' => 'Barcha javob variantlarini to\'ldiring.',
             'correct_answer.required' => 'To\'g\'ri javobni belgilang.',
+            'image.image' => 'Yuklangan fayl rasm bo\'lishi kerak.',
+            'image.mimes' => 'Faqat JPG, PNG yoki WEBP fayllar.',
+            'image.max' => 'Rasm hajmi 5 MB dan oshmasligi kerak.',
         ];
     }
 
@@ -74,6 +77,7 @@ class UpdateQuestionRequest extends FormRequest
     {
         $this->merge([
             'is_active' => $this->boolean('is_active'),
+            'delete_image' => $this->boolean('delete_image'),
         ]);
     }
 }

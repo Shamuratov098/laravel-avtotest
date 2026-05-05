@@ -4,8 +4,10 @@ namespace App\Services\Admin;
 
 use App\Models\Category;
 use App\Models\Question;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 
 class QuestionService
 {
@@ -72,10 +74,16 @@ class QuestionService
     public function store(array $data): Question
     {
         $nextOption = Question::max('order_in_category') + 1;
+
+        $imagePath = null;
+        if (isset($data['image']) && $data['image'] instanceof UploadedFile) {
+            $imagePath = $data['image']->store('questions', 'public');
+        }
+
         $question = Question::create([
             'category_id' => $data['category_id'],
             'question_text' => $data['question_text'],
-            'image_url' => $data['image_url'] ?? null,
+            'image_url' => $imagePath,
             'correct_answer' => $data['correct_answer'],
             'explanation' => $data['explanation'] ?? null,
             'order_in_category' => $nextOption,
@@ -88,14 +96,24 @@ class QuestionService
 
     public function update(Question $question, array $data): Question
     {
+        $imageUrl = $question->image_url;
+        $hasNewFile = isset($data['image']) && $data['image'] instanceof UploadedFile;
+
+        if (!empty($data['delete_image']) || $hasNewFile) {
+            $this->deleteStoredImage($question->image_url);
+            $imageUrl = null;
+        }
+
+        if ($hasNewFile) {
+            $imageUrl = $data['image']->store('questions', 'public');
+        }
 
         $question->update([
             'category_id' => $data['category_id'],
             'question_text' => $data['question_text'],
-            'image_url' => $data['image_url'] ?? null,
+            'image_url' => $imageUrl,
             'correct_answer' => $data['correct_answer'],
             'explanation' => $data['explanation'] ?? null,
-//            'order_in_category' => $data['order_in_category'],
             'is_active' => $data['is_active'],
         ]);
 
@@ -107,6 +125,7 @@ class QuestionService
 
     public function delete(Question $question): void
     {
+        $this->deleteStoredImage($question->image_url);
         $question->answers()->delete();
         $question->delete();
     }
@@ -128,5 +147,18 @@ class QuestionService
             ]);
         }
 
+    }
+
+    private function deleteStoredImage(?string $value): void
+    {
+        if (empty($value)) {
+            return;
+        }
+
+        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
+            return;
+        }
+
+        Storage::disk('public')->delete($value);
     }
 }

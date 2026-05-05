@@ -167,9 +167,9 @@
             </div>
 
             <!-- Image -->
-            @if($question?->image_url)
+            @if($question?->image_src)
                 <div style="margin-bottom:14px;">
-                    <img src="{{ $question->image_url }}" alt="Savol rasmi"
+                    <img src="{{ $question->image_src }}" alt="Savol rasmi"
                          style="max-width:320px; max-height:200px; border-radius:8px; border:1px solid #E8EEF3; object-fit:contain;">
                 </div>
             @endif

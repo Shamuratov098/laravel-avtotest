@@ -14,7 +14,7 @@
         <span>Tahrirlash — {{ $question->order_in_category }}</span>
     </div>
 
-    <form action="{{ route('admin.questions.update', $question) }}" method="POST">
+    <form action="{{ route('admin.questions.update', $question) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
 
@@ -53,15 +53,47 @@
                     <div>
                         <label
                             style="display:block; font-size:12px; font-weight:600; color:#637381; margin-bottom:7px; text-transform:uppercase; letter-spacing:.04em;">
-                            Rasm URL <span style="color:#8899A8; font-weight:400;">(ixtiyoriy)</span>
+                            Rasm <span style="color:#8899A8; font-weight:400;">(ixtiyoriy)</span>
                         </label>
-                        <input type="url" name="image_url" value="{{ old('image_url', $question->image_url) }}"
-                               style="width:100%; padding:11px 14px; border:1.5px solid {{ $errors->has('image_url') ? '#DC2626' : '#E8EEF3' }};
-                              border-radius:8px; font-size:13px; color:#1C2434; outline:none; box-sizing:border-box;"
-                               placeholder="https://example.com/image.jpg"
-                               onfocus="this.style.borderColor='#5750F1'"
-                               onblur="this.style.borderColor='{{ $errors->has('image_url') ? '#DC2626' : '#E8EEF3' }}'">
-                        @error('image_url')
+
+                        {{-- Preview blok: mavjud rasm yoki yangi tanlangan rasm --}}
+                        <div id="image-preview-wrapper"
+                             style="display:{{ $question->image_src ? 'block' : 'none' }};
+                                    padding:14px; background:#F7F9FC; border:1px solid #E8EEF3;
+                                    border-radius:10px; margin-bottom:12px;">
+                            <p id="image-preview-label" style="font-size:12px; color:#637381; margin:0 0 12px; font-weight:600;">
+                                {{ $question->image_src ? 'Mavjud rasm' : 'Tanlangan rasm' }}
+                            </p>
+                            <div style="text-align:center; margin-bottom:12px;">
+                                <img id="image-preview" src="{{ $question->image_src ?? '' }}" alt="Rasm"
+                                     style="max-width:100%; max-height:420px; object-fit:contain; border-radius:8px;
+                                            border:1px solid #E8EEF3; background:#fff;">
+                            </div>
+                            <label id="delete-image-row"
+                                   style="display:{{ $question->image_src ? 'flex' : 'none' }};
+                                          align-items:center; gap:8px; cursor:pointer; user-select:none;
+                                          padding:8px 12px; background:#fff; border:1px solid #FECACA;
+                                          border-radius:7px;">
+                                <input type="checkbox" name="delete_image" value="1"
+                                       {{ old('delete_image') ? 'checked' : '' }}
+                                       style="width:16px; height:16px; accent-color:#DC2626; cursor:pointer;">
+                                <span style="font-size:13px; color:#DC2626; font-weight:600;">Rasmni o'chirish</span>
+                            </label>
+                        </div>
+
+                        <input type="file" name="image" id="image-input" accept="image/jpeg,image/png,image/webp"
+                               onchange="previewSelectedImage(this)"
+                               style="width:100%; padding:9px 12px; border:1.5px dashed {{ $errors->has('image') ? '#DC2626' : '#E8EEF3' }};
+                              border-radius:8px; font-size:13px; color:#1C2434; outline:none; box-sizing:border-box;
+                              background:#F7F9FC; cursor:pointer;">
+                        <p style="font-size:11px; color:#8899A8; margin:6px 0 0;">
+                            @if($question->image_src)
+                                Yangi rasm yuklasangiz, eski rasm almashtiriladi.
+                            @else
+                                JPG, PNG yoki WEBP. Maksimal 5 MB.
+                            @endif
+                        </p>
+                        @error('image')
                         <p style="font-size:12px; color:#DC2626; margin:5px 0 0;">{{ $message }}</p>
                         @enderror
                     </div>
@@ -328,6 +360,40 @@
             const correctVal = parseInt('{{ old('correct_answer', $question->correct_answer) }}');
             if (correctVal) setCorrect(correctVal);
         });
+
+        const originalImageSrc = @json($question->image_src);
+        const hasOriginalImage = !!originalImageSrc;
+
+        function previewSelectedImage(input) {
+            const wrapper = document.getElementById('image-preview-wrapper');
+            const img = document.getElementById('image-preview');
+            const label = document.getElementById('image-preview-label');
+            const deleteRow = document.getElementById('delete-image-row');
+            const file = input.files && input.files[0];
+
+            if (!file) {
+                // Tanlovni bekor qildi: asl holatga qaytamiz
+                if (hasOriginalImage) {
+                    img.src = originalImageSrc;
+                    label.textContent = 'Mavjud rasm';
+                    deleteRow.style.display = 'flex';
+                    wrapper.style.display = 'block';
+                } else {
+                    wrapper.style.display = 'none';
+                    img.src = '';
+                }
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                img.src = e.target.result;
+                label.textContent = 'Yangi tanlangan rasm';
+                deleteRow.style.display = 'none';
+                wrapper.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
     </script>
 
 @endsection

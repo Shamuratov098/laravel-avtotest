@@ -26,7 +26,7 @@ class StoreQuestionRequest extends FormRequest
         return [
             'category_id' => ['required', 'exists:categories,id'],
             'question_text' => ['required', 'string'],
-            'image_url' => ['nullable', 'string', 'max:500'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'explanation' => ['nullable', 'string'],
             'is_active' => ['boolean'],
             'correct_answer' => ['required', 'integer', 'min:1', 'max:6'],
@@ -64,6 +64,9 @@ class StoreQuestionRequest extends FormRequest
             'category_id.required' => 'Kategoriya maydoni majburiy.',
             'category_id.exists' => 'Tanlangan kategoriya mavjud emas.',
             'question_text.required' => 'Savol matni majburiy.',
+            'image.image' => 'Yuklangan fayl rasm bo\'lishi kerak.',
+            'image.mimes' => 'Faqat JPG, PNG yoki WEBP fayllar.',
+            'image.max' => 'Rasm hajmi 5 MB dan oshmasligi kerak.',
             'answers.required' => 'Javob variantlari majburiy.',
             'answers.min' => 'Kamida 2 ta javob varianti bo\'lishi kerak.',
             'answers.*.answer_text.required' => 'Javob matni majburiy.',

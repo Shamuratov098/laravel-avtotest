@@ -14,7 +14,7 @@
         <span>Yangi Savol</span>
     </div>
 
-    <form action="{{ route('admin.questions.store') }}" method="POST">
+    <form action="{{ route('admin.questions.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
         <div style="display:grid; grid-template-columns:1fr 340px; gap:20px; align-items:start;">
@@ -50,19 +50,30 @@
                         @enderror
                     </div>
 
-                    {{-- Rasm URL --}}
+                    {{-- Rasm yuklash --}}
                     <div>
                         <label
                             style="display:block; font-size:12px; font-weight:600; color:#637381; margin-bottom:7px; text-transform:uppercase; letter-spacing:.04em;">
-                            Rasm URL <span style="color:#8899A8; font-weight:400;">(ixtiyoriy)</span>
+                            Rasm <span style="color:#8899A8; font-weight:400;">(ixtiyoriy)</span>
                         </label>
-                        <input type="url" name="image_url" value="{{ old('image_url') }}"
-                               style="width:100%; padding:11px 14px; border:1.5px solid {{ $errors->has('image_url') ? '#DC2626' : '#E8EEF3' }};
-                              border-radius:8px; font-size:13px; color:#1C2434; outline:none; box-sizing:border-box;"
-                               placeholder="https://example.com/image.jpg"
-                               onfocus="this.style.borderColor='#5750F1'"
-                               onblur="this.style.borderColor='{{ $errors->has('image_url') ? '#DC2626' : '#E8EEF3' }}'">
-                        @error('image_url')
+
+                        <div id="image-preview-wrapper" style="display:none; padding:14px; background:#F7F9FC;
+                                    border:1px solid #E8EEF3; border-radius:10px; margin-bottom:12px; text-align:center;">
+                            <p style="font-size:12px; color:#637381; margin:0 0 12px; text-align:left; font-weight:600;">
+                                Tanlangan rasm
+                            </p>
+                            <img id="image-preview" src="" alt="Tanlangan rasm"
+                                 style="max-width:100%; max-height:420px; border-radius:8px; border:1px solid #E8EEF3;
+                                        object-fit:contain; background:#fff;">
+                        </div>
+
+                        <input type="file" name="image" id="image-input" accept="image/jpeg,image/png,image/webp"
+                               onchange="previewSelectedImage(this)"
+                               style="width:100%; padding:9px 12px; border:1.5px dashed {{ $errors->has('image') ? '#DC2626' : '#E8EEF3' }};
+                              border-radius:8px; font-size:13px; color:#1C2434; outline:none; box-sizing:border-box;
+                              background:#F7F9FC; cursor:pointer;">
+                        <p style="font-size:11px; color:#8899A8; margin:6px 0 0;">JPG, PNG yoki WEBP. Maksimal 5 MB.</p>
+                        @error('image')
                         <p style="font-size:12px; color:#DC2626; margin:5px 0 0;">{{ $message }}</p>
                         @enderror
                     </div>
@@ -374,6 +385,25 @@
             const correctVal = parseInt(document.getElementById('correct_answer')?.value);
             if (correctVal) setCorrect(correctVal);
         });
+
+        function previewSelectedImage(input) {
+            const wrapper = document.getElementById('image-preview-wrapper');
+            const img = document.getElementById('image-preview');
+            const file = input.files && input.files[0];
+
+            if (!file) {
+                wrapper.style.display = 'none';
+                img.src = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                img.src = e.target.result;
+                wrapper.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
     </script>
 
 @endsection

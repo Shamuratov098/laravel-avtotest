@@ -106,22 +106,25 @@
             <table style="width:100%; border-collapse:collapse;">
                 <thead>
                 <tr style="background:#F7F9FC; border-bottom:2px solid #F3F4F6;">
-                    <th style="padding:12px 20px; text-align:left; font-size:11px; font-weight:700; color:#8899A8; text-transform:uppercase; letter-spacing:.06em; white-space:nowrap;">
-                        tartib raqami
+                    <th style="padding:12px 20px; text-align:center; font-size:11px; font-weight:700; color:#8899A8; text-transform:uppercase; letter-spacing:.06em; white-space:nowrap; width:80px;">
+                        №
                     </th>
-                    <th style="padding:12px 16px; text-align:left; font-size:11px; font-weight:700; color:#8899A8; text-transform:uppercase; letter-spacing:.06em;">
+                    <th style="padding:12px 12px; text-align:center; font-size:11px; font-weight:700; color:#8899A8; text-transform:uppercase; letter-spacing:.06em; width:80px;">
+                        Rasm
+                    </th>
+                    <th style="padding:12px 16px; text-align:left; font-size:11px; font-weight:700; color:#8899A8; text-transform:uppercase; letter-spacing:.06em; white-space:nowrap;">
                         Kategoriya
                     </th>
                     <th style="padding:12px 16px; text-align:left; font-size:11px; font-weight:700; color:#8899A8; text-transform:uppercase; letter-spacing:.06em;">
-                        Savol matni
+                        Savol
                     </th>
                     <th style="padding:12px 16px; text-align:left; font-size:11px; font-weight:700; color:#8899A8; text-transform:uppercase; letter-spacing:.06em;">
                         Javob variantlari
                     </th>
-                    <th style="padding:12px 16px; text-align:center; font-size:11px; font-weight:700; color:#8899A8; text-transform:uppercase; letter-spacing:.06em;">
+                    <th style="padding:12px 16px; text-align:center; font-size:11px; font-weight:700; color:#8899A8; text-transform:uppercase; letter-spacing:.06em; white-space:nowrap;">
                         Holat
                     </th>
-                    <th style="padding:12px 20px; text-align:right; font-size:11px; font-weight:700; color:#8899A8; text-transform:uppercase; letter-spacing:.06em;">
+                    <th style="padding:12px 20px; text-align:right; font-size:11px; font-weight:700; color:#8899A8; text-transform:uppercase; letter-spacing:.06em; white-space:nowrap;">
                         Amallar
                     </th>
                 </tr>
@@ -131,40 +134,51 @@
                     <tr style="border-top:1px solid #F3F4F6; transition:background .15s;"
                         onmouseover="this.style.background='#FAFBFF'" onmouseout="this.style.background='#fff'">
 
-                        {{-- Tartib raqami --}}
-                        <td style="padding:16px 20px;">
-                        <span style="display:inline-flex; align-items:center; justify-content:center;
-                                     width:32px; height:32px; background:#EEF2FF; border-radius:8px;
-                                     font-size:12px; font-weight:700; color:#5750F1;">
-                            {{ $question->order_in_category }}
-                        </span>
+                        {{-- № --}}
+                        <td style="padding:16px 20px; text-align:center;">
+                            <span style="display:inline-flex; align-items:center; justify-content:center;
+                                         width:32px; height:32px; background:#EEF2FF; border-radius:8px;
+                                         font-size:12px; font-weight:700; color:#5750F1;">
+                                {{ $question->order_in_category }}
+                            </span>
+                        </td>
+
+                        {{-- Rasm --}}
+                        <td style="padding:16px 12px; text-align:center;">
+                            @if($question->image_src)
+                                <img src="{{ $question->image_src }}" alt="Rasm"
+                                     style="width:56px; height:56px; object-fit:cover; border-radius:6px;
+                                            border:1px solid #E8EEF3; vertical-align:middle;"
+                                     loading="lazy"
+                                     onerror="this.style.display='none'">
+                            @else
+                                <span style="display:inline-flex; align-items:center; justify-content:center;
+                                             width:56px; height:56px; background:#F7F9FC; border:1px dashed #E8EEF3;
+                                             border-radius:6px; color:#C5CDD6;">
+                                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5"
+                                         viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    </svg>
+                                </span>
+                            @endif
                         </td>
 
                         {{-- Kategoriya --}}
                         <td style="padding:16px 16px;">
-                        <span style="display:inline-block; padding:4px 10px; background:#F0FDF4;
-                                     color:#15803D; border-radius:6px; font-size:12px; font-weight:600;">
-                            {{ $question->category?->name ?? '—' }}
-                        </span>
+                            <span style="display:inline-block; padding:4px 10px; background:#F0FDF4;
+                                         color:#15803D; border-radius:6px; font-size:12px; font-weight:600; white-space:nowrap;">
+                                {{ $question->category?->name ?? '—' }}
+                            </span>
                         </td>
 
-                        {{-- Savol matni --}}
+                        {{-- Savol --}}
                         <td style="padding:16px 16px; max-width:320px;">
-                            <p style="font-size:13px; font-weight:600; color:#1C2434; margin:0 0 6px;
-                                  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
-                                  overflow:hidden; line-height:1.5;">
+                            <p style="font-size:13px; font-weight:600; color:#1C2434; margin:0;
+                                      display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+                                      overflow:hidden; line-height:1.5;">
                                 {{ $question->question_text }}
                             </p>
-                            @if($question->image_url)
-                                <span style="font-size:11px; color:#5750F1; display:flex; align-items:center; gap:4px;">
-                                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"
-                                     viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                </svg>
-                                Rasm mavjud
-                            </span>
-                            @endif
                         </td>
 
                         {{-- Javob variantlari --}}
@@ -262,7 +276,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" style="padding:64px; text-align:center;">
+                        <td colspan="7" style="padding:64px; text-align:center;">
                             <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
                                 <div style="width:60px; height:60px; background:#F7F9FC; border-radius:14px;
                                         display:flex; align-items:center; justify-content:center;">

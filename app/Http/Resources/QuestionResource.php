@@ -17,7 +17,7 @@ class QuestionResource extends JsonResource
         return [
             'id' => $this->resource->id,
             'question_text' => $this->resource->question_text,
-            'image_url' => $this->resource->image_url,
+            'image_url' => $this->resource->image_src,
 
             'answers' => $this->getShuffledAnswers(),
         ];

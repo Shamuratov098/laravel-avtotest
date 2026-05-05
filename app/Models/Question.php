@@ -26,4 +26,23 @@ class Question extends Model
     {
         return $this->hasMany(Answer::class);
     }
+
+    public function getImageSrcAttribute(): ?string
+    {
+        $value = $this->image_url;
+
+        if (empty($value)) {
+            return null;
+        }
+
+        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
+            return $value;
+        }
+
+        if (str_starts_with($value, 'questions/')) {
+            return asset('storage/' . $value);
+        }
+
+        return null;
+    }
 }
