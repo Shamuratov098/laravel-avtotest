@@ -3,52 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tizimga kirish</title>
-    <link rel="stylesheet" href="{{ asset('css/user/login.css') }}">
+    <title>Tizimga kirish | Avtotest</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="bg-slate-50 flex items-center justify-center min-h-screen p-4 font-sans antialiased">
 
-    <div class="login-container">
+    <div class="max-w-md w-full bg-white rounded-3xl shadow-xl shadow-slate-200/50 p-8 border border-slate-100 animate-fade-in">
         
-        <div class="login-header">
-            <h2>Tizimga kirish</h2>
-            <p>Hisobingizga kirish uchun ma'lumotlaringizni kiriting</p>
+        <!-- Logotip -->
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">
+                <i class="fas fa-steering-wheel"></i>
+            </div>
+            <h1 class="text-2xl font-black text-slate-800 tracking-tight">Avtotestga xush kelibsiz!</h1>
+            <p class="text-slate-500 font-medium mt-2">Boshqaruv paneliga kirish uchun ma'lumotlaringizni kiriting.</p>
         </div>
 
-        @if ($errors->any())
-            <div class="error-alert">
-                {{ $errors->first() }}
-            </div>
-        @endif
+        <!-- Forma -->
+        <form action="{{ route('login.post') }}" method="POST" class="space-y-5">
+            @csrf <!-- Laravel xavfsizlik tokeni (Shart!) -->
 
-        <form method="POST" action="{{ route('login.post') }}">
-            @csrf
-            
-            <div class="form-group">
-                <input type="email" name="email" value="{{ old('email') }}" class="form-control" placeholder="Email manzil" required>
-            </div>
-
-            <div class="form-group">
-                <input type="password" name="password" class="form-control" placeholder="Parol" required>
-                <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
+            <!-- Email -->
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2">Email manzil</label>
+                <div class="relative">
+                    <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="email" name="email" value="{{ old('email') }}" required placeholder="ism@misol.uz" class="w-full pl-11 pr-4 py-3 rounded-xl border {{ $errors->has('email') ? 'border-red-300 bg-red-50' : 'border-slate-200 focus:border-blue-500' }} focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition text-slate-800 font-medium">
+                </div>
+                @error('email')
+                    <p class="text-red-500 text-sm mt-1 font-bold">{{ $message }}</p>
+                @enderror
             </div>
 
-            <div class="form-options">
-                <label class="remember-me">
-                    <input type="checkbox" name="remember"> Eslab qolish
-                </label>
-                <a href="#" class="forgot-link">Parolni unutdingizmi?</a>
+            <!-- Parol -->
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2">Parol</label>
+                <div class="relative">
+                    <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="password" name="password" required placeholder="••••••••" class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition text-slate-800 font-medium">
+                </div>
             </div>
 
-            <button type="submit" class="btn-submit">Kirish</button>
+            <!-- Tugma -->
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-md mt-4">
+                Tizimga kirish
+            </button>
         </form>
 
-        <div class="register-link">
-            Hisobingiz yo'qmi? <a href="{{ route('register') }}">Ro'yxatdan o'tish</a>
-        </div>
+        <!-- Registratsiyaga o'tish -->
+        <p class="text-center text-slate-500 font-medium mt-8">
+            Hali hisobingiz yo'qmi? 
+            <a href="{{ route('register') }}" class="text-blue-600 font-bold hover:underline">Ro'yxatdan o'tish</a>
+        </p>
 
     </div>
 

@@ -1,11 +1,12 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminAuthController;
-use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\User\WebAuthController;
 use App\Http\Controllers\User\TestController;
 use App\Http\Controllers\User\ProfileController;
 use App\Http\Controllers\User\LeaderboardController;
+use App\Http\Controllers\User\DashboardController as UserDashboard;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -22,7 +23,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Protected routes (faqat adminlar)
     Route::middleware(['auth', 'admin.web'])->group(function () {
         // Dashboard
-        Route::get('/', [DashboardController::class, 'index'])
+        Route::get('/', [AdminDashboard::class, 'index'])
             ->name('dashboard');
     });
 });
@@ -38,7 +39,7 @@ Route::post('/register', [WebAuthController::class, 'register'])->name('register
 
 Route::middleware('auth')->group(function () {
     // Dashboard - Bu "Yo'riqnoma" sahifasi bo'ladi
-    Route::get('/dashboard', [WebAuthController::class, 'dashboard'])->name('dashboard');
+    Route::get('/dashboard', [UserDashboard::class, 'index'])->name('dashboard');
     
     // Profile - Bu shaxsiy ma'lumotlar va avatar yuklash sahifasi
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');

@@ -3,36 +3,32 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\Web\ProfileUpdateRequest;
+use App\Services\Web\ProfileService;
+use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
 {
-    public function index() {
-        return view('user.profile', ['user' => auth()->user()]);
+    protected $profileService;
+
+    public function __construct(ProfileService $profileService)
+    {
+        $this->profileService = $profileService;
     }
 
-    public function update(Request $request) {
-        $user = auth()->user();
+    public function index()
+    {
+        return view('user.profile');
+    }
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'avatar' => 'nullable|image|mimes:jpg,png|max:2048' // Max 2MB rasm
-        ]);
+    public function update(ProfileUpdateRequest $request)
+    {
+        $this->profileService->updateProfile(
+            Auth::user(), 
+            $request->validated(), 
+            $request->file('avatar')
+        );
 
-        if ($request->hasFile('avatar')) {
-            // 1. Eski rasmni o'chiramiz (agar u default bo'lmasa)
-            if ($user->avatar) {
-                Storage::disk('public')->delete($user->avatar);
-            }
-            // 2. Yangi rasmni storage/app/public/avatars papkasiga saqlaymiz
-            $path = $request->file('avatar')->store('avatars', 'public');
-            $user->avatar = $path;
-        }
-
-        $user->name = $request->name;
-        $user->save();
-
-        return back()->with('success', 'Profil yangilandi!');
+        return back()->with('success', 'Profil muvaffaqiyatli yangilandi.');
     }
 }

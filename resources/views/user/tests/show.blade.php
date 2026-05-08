@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title }} | Avtotest</title>
+    <title>{{ $title ?? 'Test ishlash' }} | Avtotest</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -25,7 +25,17 @@
                 <div class="bg-violet-100 text-violet-600 w-10 h-10 rounded-xl flex items-center justify-center font-bold" id="q-number-box">1</div>
                 <div>
                     <h2 class="text-sm font-bold text-slate-800 uppercase tracking-tight" id="q-counter">Savol 1/10</h2>
-                    <p class="text-[11px] text-slate-400 font-medium">{{ $title }}</p>
+                    <p class="text-[11px] text-slate-400 font-medium">{{ $title ?? 'Test ishlash' }}</p>
+                </div>
+            </div>
+            <!-- Yuqoridagi ma'lumot qutisi -->
+            <div class="flex justify-between items-center mb-6">
+                <!-- Chap tomondagi eski ma'lumotlar... -->
+                
+                <!-- TAYMER QISMI (Shuni qo'shish esdan chiqmasin) -->
+                <div id="timer-box" class="flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-xl font-bold transition-colors shadow-sm">
+                    <i class="fas fa-clock text-lg"></i>
+                    <span id="timer-display" class="text-xl tracking-widest">--:--</span>
                 </div>
             </div>
             <div class="text-right">
@@ -35,7 +45,8 @@
 
         <div id="quiz-wrapper">
             @foreach($questions as $index => $q)
-            <div class="question-step {{ $index == 0 ? '' : 'hidden' }} animate-pop" 
+            <!-- FAKAT SHU YER TO'G'RILANDI: $index == 0 o'rniga $loop->first -->
+            <div class="question-step {{ $loop->first ? '' : 'hidden' }} animate-pop" 
                  id="step-{{ $index }}" 
                  data-id="{{ $q->id }}" 
                  data-correct="{{ $q->correct_answer }}">
@@ -47,10 +58,11 @@
                     </h3>
 
                     @if($q->image_url)
-                    <div class="mb-6 rounded-2xl overflow-hidden bg-slate-50 border border-slate-100">
+                    <div class="mb-6 rounded-2xl overflow-hidden bg-slate-50 border border-slate-100 flex justify-center p-2">
+                        <!-- DIQQAT: .png yoki .jpg ekanini loyihangizdagi rasmlarga qarab o'zgartirishingiz mumkin -->
                         <img src="{{ asset('storage/' . $q->image_url . '.png') }}" 
-                             class="w-full max-h-64 object-contain mx-auto"
-                             onerror="this.parentElement.style.display='none'">
+                             alt="Savol rasmi"
+                             class="max-w-full max-h-64 object-contain">
                     </div>
                     @endif
 
@@ -78,7 +90,8 @@
                         </div>
 
                         <button onclick="nextStep({{ $index }})" class="w-full py-4 bg-violet-600 text-white rounded-2xl font-bold shadow-lg shadow-violet-200 hover:bg-violet-700 hover:-translate-y-0.5 active:translate-y-0 transition-all">
-                            {{ $index == ($questions->count() - 1) ? 'Natijani ko\'rish' : 'Keyingi savolga o\'tish' }} 
+                            <!-- FAKAT SHU YER TO'G'RILANDI: Oxirgi savolni aniqlash uchun $loop->last -->
+                            {{ $loop->last ? 'Natijani ko\'rish' : 'Keyingi savolga o\'tish' }} 
                             <i class="fas fa-arrow-right ml-2"></i>
                         </button>
                     </div>
@@ -105,8 +118,58 @@
 
     <script>
         let correctCount = 0;
-        let testData = [];
+        let userAnswers = []; // Foydalanuvchi belgilagan javoblarni yig'ib borish uchun
         const total = {{ $questions->count() }};
+
+        // ==========================================
+        // TIMER (BACKENDGA BOG'LANGAN)
+        // ==========================================
+        
+        // Backend (Service) dan kelgan tayyor qoldiq sekundlarni olamiz:
+        let timeLeft = {{ $timeLeft }}; 
+        let timerInterval;
+
+        // Sahifa to'liq yuklanganda timerni ishga tushiramiz
+        window.onload = function() {
+            // Agar vaqt allaqachon tugagan bo'lsa (masalan F5 bosganda)
+            if (timeLeft <= 0) {
+                finishQuiz(); 
+            } else {
+                startTimer();
+            }
+        };
+
+        function startTimer() {
+            timerInterval = setInterval(function() {
+                timeLeft--;
+
+                // Minut va sekundlarni hisoblash
+                let minutes = Math.floor(timeLeft / 60);
+                let seconds = Math.floor(timeLeft % 60); 
+
+                // Agar raqam 10 dan kichkina bo'lsa, oldiga '0' qo'shamiz (09:05)
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                // Ekranga chiqarish
+                document.getElementById('timer-display').innerText = minutes + ":" + seconds;
+
+                // Vaqt 1 daqiqadan (60 sekund) kam qolganda qizil rangga aylanadi
+                if (timeLeft <= 60) {
+                    let timerBox = document.getElementById('timer-box');
+                    if (timerBox) {
+                        timerBox.classList.remove('bg-blue-100', 'text-blue-700');
+                        timerBox.classList.add('bg-red-100', 'text-red-700', 'animate-pulse');
+                    }
+                }
+
+                // Vaqt tugadi!
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval); // Taymerni to'xtatamiz
+                    finishQuiz(); // Natijani darhol saqlashga yuboramiz
+                }
+            }, 1000);
+        }
 
         function checkAnswer(qIdx, selected) {
             const currentBox = document.getElementById(`step-${qIdx}`);
@@ -133,9 +196,12 @@
 
             document.getElementById('correct-stat').innerText = correctCount;
 
-            testData.push({
+            // ==========================================
+            // JAVOB SAQLANADIGAN QISM MANA SHU YER
+            // ==========================================
+            userAnswers.push({
                 question_id: currentBox.dataset.id,
-                selected: selected,
+                chosen_answer: selected,
                 is_correct: (selected === correct)
             });
 
@@ -157,28 +223,60 @@
         }
 
         function finishQuiz() {
+            // ENG BIRINCHI ISH: Taymerni to'xtatish
+            clearInterval(timerInterval); 
+            document.getElementById('timer-box').classList.add('hidden');
             document.getElementById('quiz-wrapper').classList.add('hidden');
-            document.getElementById('q-counter').parentElement.parentElement.classList.add('hidden');
-            document.getElementById('final-screen').classList.remove('hidden');
-            document.getElementById('final-score').innerText = `${correctCount}/${total}`;
 
-            // Natijani saqlash
-            // Natijani saqlash
-        fetch("{{ route('tests.save') }}", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({
-                correct: correctCount,
-                total: total,
-                type: "{{ $type }}",
-                // Mana bu qatorni qo'shing:
-                category_id: "{{ $type == 'category' ? $questions->first()->category_id : null }}",
-                details: testData
-            })
-        });
+            // ==========================================
+            // YANGI MANTIQ: O'tdi/Yiqildi va Haqiqiy ishlangan savollar
+            // ==========================================
+            let actualTotal = userAnswers.length; // O'quvchi ulgurgan savollar soni
+            let finalTitle = "";
+            let titleColor = "";
+
+            if ("{{ $type }}" === "random") {
+                // 20 lik imtihon qoidalari
+                if (actualTotal === 20 && correctCount >= 18) {
+                    finalTitle = "Imtihondan o'tdingiz! 🎉";
+                    titleColor = "text-green-500";
+                } else {
+                    finalTitle = "Yiqildingiz! ❌";
+                    titleColor = "text-red-500";
+                }
+            } else {
+                // 10 lik oddiy test qoidalari
+                finalTitle = "Test Yakunlandi!";
+                titleColor = "text-violet-600";
+            }
+
+            // Yakuniy ekranni ko'rsatish
+            let finalScreen = document.getElementById('final-screen');
+            finalScreen.classList.remove('hidden');
+
+            // Sarlavhani (O'tdi/Yiqildi) yozish
+            finalScreen.querySelector('h2').innerText = finalTitle;
+
+            // Natijani yozish (Masalan: 7/15 yoki 9/9)
+            let finalScoreEl = document.getElementById('final-score');
+            finalScoreEl.innerText = `${correctCount}/${actualTotal}`;
+            finalScoreEl.className = `text-6xl font-black mb-6 ${titleColor}`; // Rangni dinamik berish
+
+            // Natijani bazaga saqlash
+            fetch("{{ route('tests.save') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    session_id: "{{ $testData['session']->id }}", 
+                    correct: correctCount,
+                    total: actualTotal, // <--- ASOSIY JOYI: 10 yoki 20 emas, ishlaganini yuboramiz
+                    type: "{{ $type }}",
+                    answers: userAnswers 
+                })
+            });
         }
     </script>
 </body>

@@ -3,58 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ro'yxatdan o'tish</title>
-    <link rel="stylesheet" href="{{ asset('css/user/register.css') }}">
+    <title>Ro'yxatdan o'tish | Avtotest</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="bg-slate-50 flex items-center justify-center min-h-screen p-4 font-sans antialiased">
 
-    <div class="auth-container">
+    <div class="max-w-md w-full bg-white rounded-3xl shadow-xl shadow-slate-200/50 p-8 border border-slate-100 animate-fade-in my-8">
         
-        <div class="auth-header">
-            <h2>Ro'yxatdan o'tish</h2>
-            <p>Yangi hisob yaratish uchun ma'lumotlarni to'ldiring</p>
+        <!-- Sarlavha -->
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-black text-slate-800 tracking-tight">Yangi hisob yaratish</h1>
+            <p class="text-slate-500 font-medium mt-2">Haydovchilik guvohnomasi tomon ilk qadam!</p>
         </div>
 
-        @if ($errors->any())
-            <div class="error-alert">
-                {{ $errors->first() }}
-            </div>
-        @endif
-
-        <form method="POST" action="{{ route('register.post') }}">
+        <!-- Forma -->
+        <form action="{{ route('register.post') }}" method="POST" class="space-y-4">
             @csrf
-            
-            <div class="form-group">
-                <label class="form-label">Ismingiz (F.I.SH)</label>
-                <input type="text" name="name" value="{{ old('name') }}" class="form-control" placeholder="Saidjon" required>
+
+            <!-- Ism -->
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2">Ism va Familiya</label>
+                <input type="text" name="name" value="{{ old('name') }}" required placeholder="Sardor Bekmurodov" class="w-full px-4 py-3 rounded-xl border {{ $errors->has('name') ? 'border-red-300 bg-red-50' : 'border-slate-200' }} focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition text-slate-800 font-medium">
+                @error('name')
+                    <p class="text-red-500 text-sm mt-1 font-bold">{{ $message }}</p>
+                @enderror
             </div>
 
-            <div class="form-group">
-                <label class="form-label">Telefon raqam</label>
-                <input type="tel" name="phone" value="{{ old('phone') }}" class="form-control" placeholder="+998999999999" required>
+            <!-- Telefon raqam -->
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2">Telefon raqam</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">+998</span>
+                    <!-- pl-14 orqali textni +998 dan keyinga suramiz -->
+                    <input type="text" name="phone" value="{{ old('phone') }}" required placeholder="901234567" maxlength="9" class="w-full pl-14 pr-4 py-3 rounded-xl border {{ $errors->has('phone') ? 'border-red-300 bg-red-50' : 'border-slate-200' }} focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition text-slate-800 font-medium">
+                </div>
+                @error('phone')
+                    <p class="text-red-500 text-sm mt-1 font-bold">{{ $message }}</p>
+                @enderror
             </div>
 
-            <div class="form-group">
-                <label class="form-label">Email manzil</label>
-                <input type="email" name="email" value="{{ old('email') }}" class="form-control" placeholder="example@gmail.com" required>
+            <!-- Email -->
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2">Email manzil</label>
+                <input type="email" name="email" value="{{ old('email') }}" required placeholder="ism@misol.uz" class="w-full px-4 py-3 rounded-xl border {{ $errors->has('email') ? 'border-red-300 bg-red-50' : 'border-slate-200' }} focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition text-slate-800 font-medium">
+                @error('email')
+                    <p class="text-red-500 text-sm mt-1 font-bold">{{ $message }}</p>
+                @enderror
             </div>
 
-            <div class="form-group">
-                <label class="form-label">Parol</label>
-                <input type="password" name="password" class="form-control" placeholder="Yangi parol o'ylab toping" required>
+            <!-- Parol -->
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2">Parol</label>
+                <input type="password" name="password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl border {{ $errors->has('password') ? 'border-red-300 bg-red-50' : 'border-slate-200' }} focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition text-slate-800 font-medium">
+                @error('password')
+                    <p class="text-red-500 text-sm mt-1 font-bold">{{ $message }}</p>
+                @enderror
             </div>
 
-            <div class="form-group">
-                <label class="form-label">Parolni tasdiqlang</label>
-                <input type="password" name="password_confirmation" class="form-control" placeholder="Parolni qayta kiriting" required>
+            <!-- Parolni tasdiqlash -->
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2">Parolni takrorlang</label>
+                <input type="password" name="password_confirmation" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition text-slate-800 font-medium">
             </div>
 
-            <button type="submit" class="btn-submit">Ro'yxatdan o'tish</button>
+            <!-- Tugma -->
+            <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3.5 rounded-xl transition-all shadow-md mt-6">
+                Ro'yxatdan o'tish
+            </button>
         </form>
 
-        <div class="login-link">
-            Allaqachon hisobingiz bormi? <a href="{{ route('login') }}">Tizimga kirish</a>
-        </div>
+        <!-- Loginga o'tish -->
+        <p class="text-center text-slate-500 font-medium mt-8">
+            Allaqachon hisobingiz bormi? 
+            <a href="{{ route('login') }}" class="text-blue-600 font-bold hover:underline">Kirish</a>
+        </p>
 
     </div>
 

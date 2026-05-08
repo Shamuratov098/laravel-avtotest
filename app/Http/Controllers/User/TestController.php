@@ -3,118 +3,85 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Services\Web\TestService;
+use App\Http\Requests\Web\SaveTestResultRequest;
+use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Models\Question;
-use Illuminate\Http\Request;
-use App\Models\TestSession;
-use App\Models\TestResult;
-use Illuminate\Support\Facades\DB;
+// Agar kategoriyalar ro'yxati kerak bo'lsa Category modelini chaqirish kerak bo'ladi
+// use App\Models\Category; 
 
 class TestController extends Controller
 {
+    protected $testService;
+
+    public function __construct(TestService $testService)
+    {
+        $this->testService = $testService;
+    }
+
     /**
-     * Test tanlash bosh sahifasi (Variant yoki Random tanlash uchun)
+     * Test boshlash menyusi (Kategoriyalar yoki Random tanlash sahifasi)
      */
     public function index()
     {
-        return view('user.tests.index');
+        $categories = Category::all();
+        return view('user.tests.index', compact('categories'));
     }
 
     /**
-     * Barcha 111 ta kategoriyani chiqarish
+     * Aralash (Random) testni boshlash
+     * 20 ta savol, 30 daqiqa
+     */
+    public function startCategory($id) // <--- DIQQAT: (Category $category) o'rniga ($id) yozdik
+    {
+        // Bazadan kategoriyani o'zimiz aniq topib olamiz:
+        $category = \App\Models\Category::findOrFail($id);
+
+        // Hamma narsa Service'dan tayyor keladi
+        $testData = $this->testService->startTest('category', $category->id);
+
+        $questions = $testData['questions'];
+        $timeLeft = $testData['timeLeft'];
+        $title = $category->name; // Endi bu aniq ishlashiga kafilman!
+        $type = 'category';
+
+        return view('user.tests.show', compact('testData', 'questions', 'title', 'type', 'timeLeft'));
+    }
+
+    public function startRandom()
+    {
+        // Hamma narsa Service'dan tayyor keladi
+        $testData = $this->testService->startTest('random');
+        
+        $questions = $testData['questions'];
+        $timeLeft  = $testData['timeLeft']; // Service hisoblab bergan vaqt
+        $title     = "Aralash imtihon";
+        $type      = 'random';
+
+        return view('user.tests.show', compact('testData', 'questions', 'title', 'type', 'timeLeft'));
+    }
+
+    /**
+     * Kategoriyalar ro'yxatini ko'rsatish
      */
     public function categories()
     {
-    // Kategoriyalarni savollar soni bilan olish
-    $categories = Category::withCount('questions')->orderBy('id', 'asc')->get();
-    
-    return view('user.tests.categories', compact('categories'));
+        // Bazadan barcha kategoriyalarni olamiz (agar active/inactive kabi statuslari bo'lsa where ishlatasiz)
+        $categories = Category::all(); 
+        
+        // Blade faylga jo'natamiz
+        return view('user.tests.categories', compact('categories'));
     }
 
     /**
-     * Kategoriya (Variant) bo'yicha testni boshlash
-     * Har bir kategoriyadan ketma-ket 10 ta savol
+     * Test yakunlanganda (Vaqt tugaganda yoki foydalanuvchi tugatganda)
      */
-    public function startCategory($id)
+    public function saveResult(\Illuminate\Http\Request $request)
     {
-        $category = \App\Models\Category::findOrFail($id);
-        
-        // Savollarni javoblari bilan birga yuklaymiz
-        $questions = \App\Models\Question::with(['answers' => function($query) {
-                $query->orderBy('option_number', 'asc');
-            }])
-            ->where('category_id', $id)
-            ->take(10) // Siz aytgandek 10 ta
-            ->get();
+        // Hamma qora mehnatni Service bajaradi
+        $result = $this->testService->finishTest($request->all());
 
-        return view('user.tests.show', [
-            'questions' => $questions,
-            'title' => $category->name,
-            'type' => 'category'
-        ]);
-    }
-
-    /**
-     * Tasodifiy (Random) testni boshlash
-     * Hammasini ichidan 10 ta aralash savol
-     */
-    public function startRandom()
-    {
-        $questions = Question::with('answers')
-            ->inRandomOrder()
-            ->take(10)
-            ->get();
-
-        return view('user.tests.show', [
-            'questions' => $questions,
-            'title' => "Tasodifiy imtihon testi",
-            'type' => 'random'
-        ]);
-    }
-    // Controller ichiga qo'shing:
-   
-
-    public function saveResult(Request $request)
-    {
-        DB::transaction(function () use ($request) {
-            // Testni saqlash
-            \App\Models\TestSession::create([
-                'user_id' => auth()->id(),
-                'category_id' => $request->category_id ?: null,
-                'type' => $request->type,
-                'total_questions' => $request->total,
-                'correct_count' => $request->correct,
-                'status' => 'completed',
-                'started_at' => now(), 
-                'completed_at' => now(),
-            ]);
-
-            // Faqat XP ni oshirish
-            $user = auth()->user();
-            $user->xp += $request->correct * 10; // To'g'ri javob * 10 XP
-            $user->save();
-        });
-
-        return response()->json(['status' => 'saved']);
-    }
-
-    public function statistics()
-    {
-        $user = auth()->user();
-        
-        // get() o'rniga paginate(10) ishlatamiz
-        $sessions = \App\Models\TestSession::where('user_id', $user->id)
-                    ->with('category')
-                    ->orderBy('created_at', 'desc')
-                    ->paginate(10); // 10 tadan sahifalash
-
-        // Umumiy statistika (hisob-kitoblar o'zgarmaydi)
-        $allSessions = \App\Models\TestSession::where('user_id', $user->id)->get();
-        $totalAttempts = $allSessions->count();
-        $totalCorrect = $allSessions->sum('correct_count');
-        $totalQuestions = $allSessions->sum('total_questions');
-        $accuracy = $totalQuestions > 0 ? round(($totalCorrect / $totalQuestions) * 100) : 0;
-
-        return view('user.statistics', compact('sessions', 'totalAttempts', 'accuracy', 'totalCorrect'));
+        return response()->json($result);
     }
 }

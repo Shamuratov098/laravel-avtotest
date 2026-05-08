@@ -12,6 +12,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['user_id', 'category_id', 'type', 'status', 'total_questions', 'correct_count', 'started_at', 'completed_at'])]
 class TestSession extends Model
 {
+
+    const In_progress = 'in_progress';
+    const In_progress1 = 'in_progress';
+    const In_progress2 = 'in_progress';
+    const In_progress3 = 'in_progress';
+    
+
     protected $casts = [
         'type' => TestSessionType::class,
         'status' => TestSessionStatus::class,
