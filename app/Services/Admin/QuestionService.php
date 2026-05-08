@@ -77,7 +77,7 @@ class QuestionService
 
         $imagePath = null;
         if (isset($data['image']) && $data['image'] instanceof UploadedFile) {
-            $imagePath = $data['image']->store('questions', 'public');
+            $imagePath = $this->storeUploadedImage($data['image'], null);
         }
 
         $question = Question::create([
@@ -105,7 +105,7 @@ class QuestionService
         }
 
         if ($hasNewFile) {
-            $imageUrl = $data['image']->store('questions', 'public');
+            $imageUrl = $this->storeUploadedImage($data['image'], $question->id);
         }
 
         $question->update([
@@ -121,6 +121,41 @@ class QuestionService
         $this->syncAnswers($question, $data['answers']);
 
         return $question->fresh('answers');
+    }
+
+    public function checkAvailability(string $originalName, ?int $excludeId = null): array
+    {
+        $base = $this->sanitizeFilename(pathinfo($originalName, PATHINFO_FILENAME));
+        $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+
+        if ($base === '' || $ext === '') {
+            return ['exists' => false];
+        }
+
+        $candidate = "{$base}.{$ext}";
+        $path = "questions/{$candidate}";
+
+        $existingQuestion = Question::query()
+            ->where('image_url', $path)
+            ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
+            ->with('category:id,name')
+            ->first();
+
+        $diskTaken = Storage::disk('public')->exists($path);
+
+        if (!$existingQuestion && !$diskTaken) {
+            return ['exists' => false];
+        }
+
+        return [
+            'exists' => true,
+            'question_id' => $existingQuestion?->id,
+            'category' => $existingQuestion?->category?->name,
+            'edit_url' => $existingQuestion
+                ? route('admin.questions.edit', $existingQuestion->id)
+                : null,
+            'suggested_name' => $this->resolveAvailableFilename($base, $ext, $excludeId),
+        ];
     }
 
     public function delete(Question $question): void
@@ -160,5 +195,59 @@ class QuestionService
         }
 
         Storage::disk('public')->delete($value);
+    }
+
+    private function storeUploadedImage(UploadedFile $file, ?int $excludeId): string
+    {
+        $base = $this->sanitizeFilename(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
+        $ext = strtolower($file->getClientOriginalExtension());
+
+        if ($base === '') {
+            $base = 'image';
+        }
+        if ($ext === '') {
+            $ext = strtolower($file->guessExtension() ?: 'jpg');
+        }
+
+        $filename = $this->resolveAvailableFilename($base, $ext, $excludeId);
+        $file->storeAs('questions', $filename, 'public');
+
+        return "questions/{$filename}";
+    }
+
+    private function sanitizeFilename(string $original): string
+    {
+        $clean = mb_strtolower(trim($original));
+        $clean = preg_replace('/[\s_]+/u', '-', $clean);
+        $clean = preg_replace('/[^\p{L}\p{N}\-]/u', '', $clean);
+        $clean = preg_replace('/-+/', '-', $clean);
+        return trim($clean, '-');
+    }
+
+    private function resolveAvailableFilename(string $base, string $ext, ?int $excludeId): string
+    {
+        $candidate = "{$base}.{$ext}";
+        $counter = 2;
+
+        while ($this->isFilenameTaken($candidate, $excludeId)) {
+            $candidate = "{$base}-{$counter}.{$ext}";
+            $counter++;
+        }
+
+        return $candidate;
+    }
+
+    private function isFilenameTaken(string $filename, ?int $excludeId): bool
+    {
+        $path = "questions/{$filename}";
+
+        if (Storage::disk('public')->exists($path)) {
+            return true;
+        }
+
+        return Question::query()
+            ->where('image_url', $path)
+            ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
+            ->exists();
     }
 }

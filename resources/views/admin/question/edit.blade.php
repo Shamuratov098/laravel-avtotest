@@ -86,6 +86,20 @@
                                style="width:100%; padding:9px 12px; border:1.5px dashed {{ $errors->has('image') ? '#DC2626' : '#E8EEF3' }};
                               border-radius:8px; font-size:13px; color:#1C2434; outline:none; box-sizing:border-box;
                               background:#F7F9FC; cursor:pointer;">
+
+                        <div id="image-name-warning"
+                             style="display:none; margin-top:10px; padding:11px 14px;
+                                    background:#FEF9C3; border:1px solid #FDE68A; border-radius:8px;
+                                    font-size:12px; color:#92400E; line-height:1.6;
+                                    align-items:flex-start; gap:8px;">
+                            <svg style="flex-shrink:0; margin-top:2px;" width="14" height="14" fill="none"
+                                 stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                            </svg>
+                            <div id="image-name-warning-text" style="flex:1;"></div>
+                        </div>
+
                         <p style="font-size:11px; color:#8899A8; margin:6px 0 0;">
                             @if($question->image_src)
                                 Yangi rasm yuklasangiz, eski rasm almashtiriladi.
@@ -363,16 +377,18 @@
 
         const originalImageSrc = @json($question->image_src);
         const hasOriginalImage = !!originalImageSrc;
+        const imageCheckUrl = @json(route('admin.questions.check-image-name'));
+        const editingQuestionId = {{ $question->id }};
 
         function previewSelectedImage(input) {
             const wrapper = document.getElementById('image-preview-wrapper');
             const img = document.getElementById('image-preview');
             const label = document.getElementById('image-preview-label');
             const deleteRow = document.getElementById('delete-image-row');
+            const warning = document.getElementById('image-name-warning');
             const file = input.files && input.files[0];
 
             if (!file) {
-                // Tanlovni bekor qildi: asl holatga qaytamiz
                 if (hasOriginalImage) {
                     img.src = originalImageSrc;
                     label.textContent = 'Mavjud rasm';
@@ -382,6 +398,7 @@
                     wrapper.style.display = 'none';
                     img.src = '';
                 }
+                warning.style.display = 'none';
                 return;
             }
 
@@ -393,6 +410,50 @@
                 wrapper.style.display = 'block';
             };
             reader.readAsDataURL(file);
+
+            checkImageNameAvailability(file.name);
+        }
+
+        function checkImageNameAvailability(filename) {
+            const warning = document.getElementById('image-name-warning');
+            const url = new URL(imageCheckUrl);
+            url.searchParams.set('name', filename);
+            if (editingQuestionId) url.searchParams.set('exclude_id', editingQuestionId);
+
+            fetch(url.toString(), {headers: {'Accept': 'application/json'}})
+                .then(r => r.ok ? r.json() : null)
+                .then(data => {
+                    if (!data || !data.exists) {
+                        warning.style.display = 'none';
+                        return;
+                    }
+                    renderImageWarning(data);
+                })
+                .catch(() => {
+                    warning.style.display = 'none';
+                });
+        }
+
+        function renderImageWarning(data) {
+            const warning = document.getElementById('image-name-warning');
+            const text = document.getElementById('image-name-warning-text');
+            const code = `<code style="background:#fff; padding:2px 6px; border-radius:4px; font-size:11px;">${escapeHtml(data.suggested_name)}</code>`;
+
+            if (data.question_id) {
+                text.innerHTML = `Bu nomdagi rasm allaqachon <strong>${data.question_id}-savolda</strong>` +
+                    (data.category ? ` &mdash; <strong>${escapeHtml(data.category)}</strong>` : '') +
+                    ` da ishlatilgan. <a href="${data.edit_url}" target="_blank" style="color:#92400E; text-decoration:underline; font-weight:600;">Ko'rish</a>. ` +
+                    `Saqlasangiz ${code} deb saqlanadi.`;
+            } else {
+                text.innerHTML = `Bu nomli fayl allaqachon yuklangan. Saqlasangiz ${code} deb saqlanadi.`;
+            }
+            warning.style.display = 'flex';
+        }
+
+        function escapeHtml(s) {
+            return String(s ?? '').replace(/[&<>"']/g, c => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            })[c]);
         }
     </script>
 

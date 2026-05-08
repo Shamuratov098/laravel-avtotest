@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\UpdateQuestionRequest;
 use App\Models\Category;
 use App\Models\Question;
 use App\Services\Admin\QuestionService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -99,5 +100,20 @@ class QuestionController extends Controller
         $message = $isActive ? 'Savol faollashtirildi!' : 'Savol nofaollashtirildi!';
 
         return redirect()->back()->with('success', $message);
+    }
+
+    public function checkImageName(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'exclude_id' => 'nullable|integer',
+        ]);
+
+        return response()->json(
+            $this->questionService->checkAvailability(
+                $data['name'],
+                $data['exclude_id'] ?? null,
+            )
+        );
     }
 }
