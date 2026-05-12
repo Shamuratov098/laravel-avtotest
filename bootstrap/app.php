@@ -22,6 +22,8 @@ return Application::configure(basePath: dirname(__DIR__))
         \App\Providers\RepositoryServiceProvider::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->trustProxies(at: '*');
+
         $middleware->alias([
             'admin' => EnsureIsAdmin::class,
             'admin.web' => EnsureAdminWeb::class,
