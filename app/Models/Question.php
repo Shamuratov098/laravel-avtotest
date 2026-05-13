@@ -39,10 +39,12 @@ class Question extends Model
             return $value;
         }
 
-        if (str_starts_with($value, 'questions/')) {
-            return asset('storage/' . $value);
+        $filename = ltrim(str_starts_with($value, 'questions/') ? substr($value, 10) : $value, '/');
+
+        if (pathinfo($filename, PATHINFO_EXTENSION) === '') {
+            $filename .= '.jpg';
         }
 
-        return null;
+        return asset('storage/questions/' . $filename);
     }
 }
