@@ -36,7 +36,7 @@ class ImportQuestionsCommand extends Command
                         'correct_answer' => $q['correct_answer'],
                         'explanation' => $q['correct_ans_alls'],
                         'order_in_category' => $q['id'],
-                        'is_active' => $q['done'] ?? true,
+                        'is_active' => true,
                     ]);
                     foreach ($q['answers'] as $index => $text) {
                         $question->answers()->create([
