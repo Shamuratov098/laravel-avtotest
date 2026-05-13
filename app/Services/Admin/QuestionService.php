@@ -45,7 +45,7 @@ class QuestionService
             ->when(
                 $categoryId,
                 fn($q) => $q->orderBy('order_in_category'),
-                fn($q) => $q->orderByDesc('created_at'),
+                fn($q) => $q->orderBy('category_id')->orderBy('order_in_category'),
             )
             ->paginate(20)
             ->withQueryString();
