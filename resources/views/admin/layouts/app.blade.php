@@ -16,6 +16,7 @@
 
     <!-- ===================== SIDEBAR ===================== -->
     <aside
+        id="adminSidebar"
         style="width:260px; min-width:260px; background:#fff; border-right:1px solid #E8E8E8; display:flex; flex-direction:column; min-height:100vh; position:sticky; top:0; height:100vh; overflow-y:auto;">
 
         <!-- Logo -->
@@ -125,15 +126,26 @@
 
     </aside>
 
+    <!-- Mobil drawer overlay (faqat mobilda ko'rinadi) -->
+    <div id="adminOverlay" class="admin-overlay" onclick="closeAdminSidebar()"></div>
+
     <!-- ===================== MAIN CONTENT ===================== -->
     <div style="flex:1; display:flex; flex-direction:column; min-width:0; overflow:hidden;">
 
         <!-- Header -->
         <header
+            id="adminHeader"
             style="background:#fff; border-bottom:1px solid #E8E8E8; padding:14px 32px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:30;">
-            <div>
-                <h2 style="font-size:18px; font-weight:700; color:#1C2434; margin:0;">@yield('title', 'Dashboard')</h2>
-                <p style="font-size:12px; color:#8899A8; margin:2px 0 0;">{{ now()->format('d F, Y') }}</p>
+            <div style="display:flex; align-items:center; gap:12px;">
+                <button type="button" class="admin-hamburger" aria-label="Menyu" onclick="toggleAdminSidebar()">
+                    <svg width="24" height="24" fill="none" stroke="#1C2434" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+                <div>
+                    <h2 style="font-size:18px; font-weight:700; color:#1C2434; margin:0;">@yield('title', 'Dashboard')</h2>
+                    <p style="font-size:12px; color:#8899A8; margin:2px 0 0;">{{ now()->format('d F, Y') }}</p>
+                </div>
             </div>
 
             <div style="display:flex; align-items:center; gap:12px;">
@@ -184,7 +196,7 @@
         @endif
 
         <!-- Content -->
-        <main style="flex:1; padding:28px 32px;">
+        <main id="adminMain" style="flex:1; padding:28px 32px;">
             @yield('content')
         </main>
 
@@ -198,5 +210,17 @@
 </div>
 
 @yield('scripts')
+
+<script>
+    function toggleAdminSidebar() {
+        document.getElementById('adminSidebar').classList.toggle('is-open');
+        document.getElementById('adminOverlay').classList.toggle('is-open');
+    }
+
+    function closeAdminSidebar() {
+        document.getElementById('adminSidebar').classList.remove('is-open');
+        document.getElementById('adminOverlay').classList.remove('is-open');
+    }
+</script>
 </body>
 </html>
