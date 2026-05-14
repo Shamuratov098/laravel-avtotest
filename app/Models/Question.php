@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 #[Fillable(['category_id', 'question_text', 'image_url', 'correct_answer', 'explanation', 'order_in_category', 'is_active'])]
 class Question extends Model
@@ -45,6 +46,6 @@ class Question extends Model
             $filename .= '.jpg';
         }
 
-        return asset('storage/questions/' . $filename);
+        return Storage::disk('minio')->url('questions/' . $filename);
     }
 }

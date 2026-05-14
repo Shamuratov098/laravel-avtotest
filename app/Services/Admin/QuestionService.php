@@ -134,14 +134,15 @@ class QuestionService
 
         $candidate = "{$base}.{$ext}";
         $path = "questions/{$candidate}";
+        $url = Storage::disk('minio')->url($path);
 
         $existingQuestion = Question::query()
-            ->where('image_url', $path)
+            ->where(fn($q) => $q->where('image_url', $path)->orWhere('image_url', $url))
             ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
             ->with('category:id,name')
             ->first();
 
-        $diskTaken = Storage::disk('public')->exists($path);
+        $diskTaken = Storage::disk('minio')->exists($path);
 
         if (!$existingQuestion && !$diskTaken) {
             return ['exists' => false];
@@ -190,11 +191,13 @@ class QuestionService
             return;
         }
 
-        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
+        $path = $this->extractMinioPath($value);
+
+        if ($path === null) {
             return;
         }
 
-        Storage::disk('public')->delete($value);
+        Storage::disk('minio')->delete($path);
     }
 
     private function storeUploadedImage(UploadedFile $file, ?int $excludeId): string
@@ -210,9 +213,26 @@ class QuestionService
         }
 
         $filename = $this->resolveAvailableFilename($base, $ext, $excludeId);
-        $file->storeAs('questions', $filename, 'public');
+        $path = "questions/{$filename}";
 
-        return "questions/{$filename}";
+        Storage::disk('minio')->put($path, file_get_contents($file->getRealPath()), 'public');
+
+        return Storage::disk('minio')->url($path);
+    }
+
+    private function extractMinioPath(string $value): ?string
+    {
+        $publicBase = rtrim(Storage::disk('minio')->url(''), '/');
+
+        if ($publicBase !== '' && str_starts_with($value, $publicBase)) {
+            return ltrim(substr($value, strlen($publicBase)), '/');
+        }
+
+        if (str_starts_with($value, 'questions/')) {
+            return $value;
+        }
+
+        return null;
     }
 
     private function sanitizeFilename(string $original): string
@@ -241,12 +261,14 @@ class QuestionService
     {
         $path = "questions/{$filename}";
 
-        if (Storage::disk('public')->exists($path)) {
+        if (Storage::disk('minio')->exists($path)) {
             return true;
         }
 
+        $url = Storage::disk('minio')->url($path);
+
         return Question::query()
-            ->where('image_url', $path)
+            ->where(fn($q) => $q->where('image_url', $path)->orWhere('image_url', $url))
             ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
             ->exists();
     }
