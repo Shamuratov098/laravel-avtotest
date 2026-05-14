@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 //php artisan questions:import avtotest-question.json
 
 use App\Models\Category;
+use App\Models\Question;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
@@ -18,6 +19,12 @@ class ImportQuestionsCommand extends Command
      */
     public function handle(): void
     {
+        if (Question::query()->exists()) {
+            $this->info('Savollar allaqachon mavjud — import o\'tkazib yuborildi.');
+
+            return;
+        }
+
         $file = storage_path('data/' . $this->argument('file'));
         $data = json_decode(file_get_contents($file), true);
         //kategoriyani guruxlash
