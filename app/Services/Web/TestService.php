@@ -10,100 +10,145 @@ use Carbon\Carbon;
 
 class TestService
 {
-    /**
-     * Testni boshlash (in_progress)
-     */
-    public function startTest(string $type, ?int $categoryId = null)
+    public function startTest(string $type, ?int $categoryId = null): array
     {
-        $totalQuestions = ($type === 'random') ? 20 : 10;
-        $timeLimitMinutes = ($type === 'random') ? 30 : 15;
+        $user             = Auth::user();
+        $totalQuestions   = ($type === 'random') ? 20 : 10;
+        $timeLimitMinutes = (str_contains((string)$type, 'random')) ? 30 : 15;
 
-        $session = TestSession::create([
-            'user_id' => Auth::id(),
-            'category_id' => $categoryId,
-            'type' => $type,
-            'status' => TestSession::In_progress,
-            'total_questions' => $totalQuestions,
-            'started_at' => now(),
-        ]);
+        TestSession::where('user_id', $user->id)
+            ->where('status', 'in_progress')
+            ->get()
+            ->each(function($session) {
+                $limit = ($session->type->value === 'random') ? 30 : 15;
+                $limit = ($session->type === 'random') ? 30 : 15;
+                $endTime = Carbon::parse($session->started_at)->addMinutes($limit);
+                
+                if (now()->greaterThan($endTime)) {
+                    $session->update([
+                        'status'       => 'completed',
+                        'completed_at' => $endTime, // ← test vaqti tugagan aniq moment
+                    ]);
+                }
+            });
 
-        if ($type === 'category') {
-            $questions = \App\Models\Question::where('category_id', $categoryId)
-                            ->inRandomOrder()
-                            ->limit($totalQuestions)
-                            ->get();
-        } else {
-            $questions = \App\Models\Question::inRandomOrder()
-                            ->limit($totalQuestions)
-                            ->get();
+        $session   = null;
+        $questions = collect();
+
+        $activeSession = TestSession::where('user_id', $user->id)
+            ->where('status', 'in_progress')
+            ->where('type', $type)
+            ->when($categoryId, fn($q) => $q->where('category_id', $categoryId))
+            ->latest()
+            ->first();
+
+        if ($activeSession) {
+            $endTime          = Carbon::parse($activeSession->started_at)->addMinutes($timeLimitMinutes);
+            $remainingSeconds = now()->diffInSeconds($endTime, false);
+
+            if ($remainingSeconds > 0) {
+                $session     = $activeSession;
+                $results     = TestResult::where('test_session_id', $session->id)->orderBy('id')->get();
+                $questionIds = $results->pluck('question_id')->toArray();
+                $questions   = Question::whereIn('id', $questionIds)
+                    ->get()
+                    ->sortBy(fn($q) => array_search($q->id, $questionIds))
+                    ->values();
+            } else {
+                $activeSession->update(['status' => 'completed']);
+            }
         }
 
-        // ====================================================
-        // TAYMER MANTIQI (Backend hisob-kitobi)
-        // ====================================================
-        // 1. Tugash vaqtini hisoblaymiz (Boshlangan vaqt + Berilgan daqiqa)
-        $endTime = \Carbon\Carbon::parse($session->started_at)->addMinutes($timeLimitMinutes);
-        
-        // 2. Hozirgi vaqtdan tugash vaqtigacha necha sekund qolganini topamiz
+        if (!$session) {
+            $session = TestSession::create([
+                'user_id'         => $user->id,
+                'category_id'     => $categoryId,
+                'type'            => $type,
+                'status'          => 'in_progress',
+                'total_questions' => $totalQuestions,
+                'started_at'      => now(),
+            ]);
+
+            $questions = ($type === 'category')
+                ? Question::where('category_id', $categoryId)->where('is_active', true)->orderBy('order_in_category')->limit($totalQuestions)->get()
+                : Question::where('is_active', true)->inRandomOrder()->limit($totalQuestions)->get();
+
+            foreach ($questions as $q) {
+                TestResult::create([
+                    'test_session_id' => $session->id,
+                    'question_id'     => $q->id,
+                    'chosen_answer'   => 0,
+                    'is_correct'      => false,
+                ]);
+            }
+        }
+
+        $endTime          = Carbon::parse($session->started_at)->addMinutes($timeLimitMinutes);
         $remainingSeconds = now()->diffInSeconds($endTime, false);
-        
-        // 3. Agar vaqt o'tib ketgan bo'lsa manfiy sonni emas, 0 ni olamiz
-        $timeLeft = $remainingSeconds > 0 ? (int) $remainingSeconds : 0;
+        $timeLeft         = $remainingSeconds > 0 ? (int) $remainingSeconds : 0;
+
+        $answeredQuestions = TestResult::where('test_session_id', $session->id)
+            ->where('chosen_answer', '!=', 0)
+            ->get();
 
         return [
-            'session' => $session,
-            'time_limit' => $timeLimitMinutes,
-            'total_questions' => $totalQuestions,
-            'questions' => $questions,
-            'timeLeft' => $timeLeft // <--- HISOB-KITOB QILINGAN VAQT (SEKUNDDA)
+            'session'              => $session,
+            'time_limit'           => $timeLimitMinutes,
+            'total_questions'      => $totalQuestions,
+            'questions'            => $questions,
+            'timeLeft'             => $timeLeft,
+            'answered'             => $answeredQuestions,
+            'answeredCount'        => $answeredQuestions->count(),
+            'correctAnsweredCount' => $answeredQuestions->where('is_correct', 1)->count(),
         ];
     }
 
-    /**
-     * Testni yakunlash (completed) va Natijalarni saqlash
-     */
-    public function finishTest(array $data)
+    public function saveAnswer(array $data): array
     {
-        $session = \App\Models\TestSession::find($data['session_id']);
+        TestResult::where('test_session_id', $data['session_id'])
+            ->where('question_id', $data['question_id'])
+            ->update([
+                'chosen_answer' => $data['chosen_answer'],
+                'is_correct'    => $data['is_correct'],
+            ]);
+
+        return ['success' => true];
+    }
+
+    public function finishTest(array $data): array
+    {
+        $session = TestSession::find($data['session_id']);
 
         if (!$session) {
             return ['success' => false, 'message' => 'Sessiya topilmadi'];
         }
 
-        // 1. Sessiyani yangilash (Oldingi yozganimiz)
+        // JS dan emas, bazadan hisoblaymiz
+        $actualAnswered = TestResult::where('test_session_id', $session->id)
+            ->where('chosen_answer', '!=', 0)
+            ->count();
+
+        $actualCorrect = TestResult::where('test_session_id', $session->id)
+            ->where('chosen_answer', '!=', 0)
+            ->where('is_correct', true)
+            ->count();
+
         $session->update([
-            'correct_count' => $data['correct'],
-            'status'       => 'completed',
-            'total_questions' => count($data['answers'] ?? []),
-            'completed_at' => now(),
+            'correct_count'   => $actualCorrect,
+            'total_questions' => $actualAnswered,
+            'status'          => 'completed',
+            'completed_at'    => now(),
         ]);
 
-        // ====================================================
-        // 2. YANGI QISM: Batafsil natijalarni saqlash
-        // ====================================================
-        if (isset($data['answers']) && is_array($data['answers'])) {
-            foreach ($data['answers'] as $ans) {
-                \App\Models\TestResult::create([
-                    'test_session_id' => $session->id,
-                    'question_id'     => $ans['question_id'],
-                    'chosen_answer'   => $ans['chosen_answer'],
-                    'is_correct'      => $ans['is_correct'],
-                    // Agar 'test_results' jadvalingizda boshqa ustunlar ham bo'lsa 
-                    // (masalan, tanlangan javob ID si), shu yerga qo'shasiz.
-                ]);
-            }
-        }
-
-        // 3. XP qo'shish (Oldingi yozganimiz)
-        $xpEarned = $data['correct'] * 5;
-        
-        $user = auth()->user();
-        $user->increment('xp', $xpEarned);
+        $xpEarned = $actualCorrect * 5;
+        auth()->user()->increment('xp', $xpEarned);
 
         return [
-            'success' => true, 
-            'xp' => $xpEarned,
-            'message' => 'Natija muvaffaqiyatli saqlandi!'
+            'success' => true,
+            'xp'      => $xpEarned,
+            'correct' => $actualCorrect,
+            'total'   => $actualAnswered,
+            'message' => 'Natija muvaffaqiyatli saqlandi!',
         ];
     }
 }

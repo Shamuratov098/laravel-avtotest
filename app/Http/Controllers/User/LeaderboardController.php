@@ -27,7 +27,7 @@ class LeaderboardController extends Controller
         $top2 = $users->get(1);
         $top3 = $users->get(2);
         
-        $otherUsers = $users->skip(3);
+        $otherUsers = $users->skip(3)->values();
 
         // Joriy foydalanuvchining o'rni va XP sini aniqlash
         $currentUserId = auth()->id();

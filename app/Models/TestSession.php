@@ -14,11 +14,7 @@ class TestSession extends Model
 {
 
     const In_progress = 'in_progress';
-    const In_progress1 = 'in_progress';
-    const In_progress2 = 'in_progress';
-    const In_progress3 = 'in_progress';
     
-
     protected $casts = [
         'type' => TestSessionType::class,
         'status' => TestSessionStatus::class,
@@ -29,7 +25,7 @@ class TestSession extends Model
     ];
 
     protected $attributes = [
-        'status' => 'in_progress',
+        'status' => self::In_progress,
         'total_questions' => 10,
         'correct_count' => 0,
     ];

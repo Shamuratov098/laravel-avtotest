@@ -52,10 +52,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/categories', [TestController::class, 'categories'])->name('categories');
         Route::get('/random', [TestController::class, 'startRandom'])->name('random');
         Route::get('/category/{id}', [TestController::class, 'startCategory'])->name('category');
-        Route::get('/statistics', [TestController::class, 'statistics'])->name('statistics');
         
         // Yangi qator: Natijani statistika uchun saqlash (AJAX orqali)
         Route::post('/save-result', [TestController::class, 'saveResult'])->name('save');
+        Route::post('/save-answer', [TestController::class, 'saveSingleAnswer'])->name('save_answer');
     });
 
     Route::post('/logout', [WebAuthController::class, 'logout'])->name('logout');

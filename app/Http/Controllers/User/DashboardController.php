@@ -15,13 +15,22 @@ class DashboardController extends Controller
         $this->dashboardService = $dashboardService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        // Service'dan barcha hisob-kitoblarni olamiz
         $stats = $this->dashboardService->getUserStats();
-        
-        // Blade-ga aynan "stats" nomi bilan jo'natamiz
-        return view('user.dashboard', compact('stats')); 
-        // (Eslatma: agar faylingiz to'g'ridan-to'g'ri views/dashboard.blade.php da bo'lsa, view('dashboard') qilasiz)
+ 
+        // Filter parametrlarini requestdan olamiz
+        // Agar parametr bo'lmasa — default qiymat ishlatiladi
+        $filters = [
+            'type'   => $request->get('type', 'all'),    // all | random | category
+            'status' => $request->get('status', 'all'),  // all | passed | failed | practice
+            'sort'   => $request->get('sort', 'newest'), // newest | oldest
+        ];
+ 
+        // Filtrlangan sessiyalarni alohida olamiz
+        $stats['recentSessions'] = $this->dashboardService->getFilteredSessions($filters);
+ 
+        return view('user.dashboard', compact('stats', 'filters'));
+
     }
 }
